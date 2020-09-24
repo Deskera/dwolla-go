@@ -1,3 +1,3 @@
-module github.com/Deskera/dwolla
+module github.com/Deskera/dwolla-go
 
 go 1.14

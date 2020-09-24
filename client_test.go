@@ -3,7 +3,7 @@ package dwolla_test
 import (
 	"testing"
 
-	"github.com/Deskera/dwolla"
+	"github.com/Deskera/dwolla-go"
 )
 
 func TestNewClient(t *testing.T) {
