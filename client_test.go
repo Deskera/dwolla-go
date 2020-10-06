@@ -8,14 +8,34 @@ import (
 
 func TestNewClient(t *testing.T) {
 	conf := &dwolla.Config{
-		ClientId:     "<DWOLLA_KEY>",
-		ClientSecret: "<DWOLLA_SECRET>",
+		ClientId:     "<CLIENT_ID>",
+		ClientSecret: "<CLIENT_SECRET>",
 		Enviorment:   "sandbox",
 	}
 	client := dwolla.NewClient(conf)
-	id, err := client.Root.GetAccountId()
+	id, err := client.Account.GetAccountId()
 	if err != nil {
 		t.Log(err)
 	}
 	t.Log("id: ", id)
+
+	accountDetails, err := client.Account.GetAccountDetails()
+	if err != nil {
+		t.Log(err)
+	}
+	t.Logf("account: %+v\n", accountDetails)
+
+	fundingSources, err := client.Account.GetFundingSources()
+	if err != nil {
+		t.Log(err)
+	}
+
+	t.Logf("funding sources: %+v\n", fundingSources)
+
+	customers, err := client.Costumer.GetCustomers()
+	if err != nil {
+		t.Log(err)
+	}
+
+	t.Logf("Customers: %+v\n", customers)
 }

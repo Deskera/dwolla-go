@@ -7,22 +7,22 @@ import (
 	"strings"
 )
 
-type root struct {
+type account struct {
 	authHandler *auth
 	baseURL     string
 }
 
-func Root(rootConfig *root) *root {
-	return rootConfig
+func AccountHandler(accountConfig *account) *account {
+	return accountConfig
 }
 
 var accountId string
 
-func (r *root) setupRoot() error {
-	url := r.baseURL + "/"
+func (a *account) setupRoot() error {
+	url := a.baseURL + "/"
 	accept := "application/vnd.dwolla.v1.hal+json"
 
-	token, err := r.authHandler.GetToken()
+	token, err := a.authHandler.GetToken()
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -45,7 +45,7 @@ func (r *root) setupRoot() error {
 	return nil
 }
 
-func (r *root) GetAccountId() (string, error) {
+func (a *account) GetAccountId() (string, error) {
 	if accountId == "" {
 		return "", errors.New("no accountId")
 	}
@@ -59,64 +59,62 @@ func (r *root) GetAccountId() (string, error) {
 	return accountIdFetched, nil
 }
 
-func (r *root) GetAccountDetails() {
-	id, err := r.GetAccountId()
+func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
+	id, err := a.GetAccountId()
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	url := r.baseURL + "/accounts" + "/" + id
+	url := a.baseURL + "/accounts" + "/" + id
 	accept := "application/vnd.dwolla.v1.hal+json"
 
-	token, err := r.authHandler.GetToken()
+	token, err := a.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
-		return
+		return nil, err
 	}
 
 	res, err := makeGetRequest(url, accept, nil, token)
 	if err != nil {
-		log.Println(err)
-		return
+		return nil, err
 	}
 
 	defer res.Body.Close()
 
 	var accountsResponse AccountDetailsResponse
 	if err := json.NewDecoder(res.Body).Decode(&accountsResponse); err != nil {
-		return
+		return nil, err
 	}
 
 	log.Printf("%+v\n", accountsResponse)
+
+	return &accountsResponse, nil
 }
 
-func (r *root) GetFundingSources() {
-	id, err := r.GetAccountId()
+func (a *account) GetFundingSources() (*FundingSourcesResponse, error) {
+	id, err := a.GetAccountId()
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	url := r.baseURL + "/accounts" + "/" + id + "/funding-sources"
+	url := a.baseURL + "/accounts" + "/" + id + "/funding-sources"
 	accept := "application/vnd.dwolla.v1.hal+json"
 
-	token, err := r.authHandler.GetToken()
+	token, err := a.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
-		return
+		return nil, err
 	}
 
 	res, err := makeGetRequest(url, accept, nil, token)
 	if err != nil {
-		log.Println(err)
-		return
+		return nil, err
 	}
 
 	defer res.Body.Close()
 
-	var accountsResponse AccountDetailsResponse
+	var accountsResponse FundingSourcesResponse
 	if err := json.NewDecoder(res.Body).Decode(&accountsResponse); err != nil {
-		return
+		return nil, err
 	}
 
-	log.Printf("%+v\n", accountsResponse)
+	return &accountsResponse, nil
 }

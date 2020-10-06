@@ -28,44 +28,65 @@ type UnverifiedCustomer struct {
 	CustomerId    string `json:"-"`
 }
 
-type CustomerResponse struct {
+type Customer struct {
+	Id           string `json:"id"`
+	FirstName    string `json:"firstName"`
+	LastName     string `json:"lastName"`
+	Email        string `json:"email"`
+	Type         string `json:"type"`
+	Status       string `json:"status"`
+	Created      string `json:"created"`
+	BusinessName string `json:"businessName"`
 }
 
 type CustomersResponse struct {
+	Embedded struct {
+		Customers []Customer `json:"customers"`
+	} `json:"_embedded"`
 }
 
 type RootResponse struct {
 	Links struct {
-		Account struct {
-			Href string `json:"href"`
-		} `json:"account"`
+		Account link `json:"account"`
 	} `json:"_links"`
 }
 
 type AccountDetailsResponse struct {
 	Links struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-		Receive struct {
-			Href string `json:"href"`
-		} `json:"receive"`
-		FundingSources struct {
-			Href string `json:"href"`
-		} `json:"funding-sources"`
-		Transfers struct {
-			Href string `json:"href"`
-		} `json:"transfers"`
-		Customers struct {
-			Href string `json:"href"`
-		} `json:"customers"`
-		Send struct {
-			Href string `json:"href"`
-		} `json:"send"`
+		Self           link `json:"self"`
+		Receive        link `json:"receive"`
+		FundingSources link `json:"funding-sources"`
+		Transfers      link `json:"transfers"`
+		Customers      link `json:"customers"`
+		Send           link `json:"send"`
 	} `json:"_links"`
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
+type Funding struct {
+	Id              string   `json:"id"`
+	Name            string   `json:"name"`
+	Status          string   `json:"status"`
+	Type            string   `json:"type"`
+	BankAccountType string   `json:"bankAccountType"`
+	Created         string   `json:"created"`
+	Removed         bool     `json:"removed"`
+	Channels        []string `json:"channels"`
+	BankName        string   `json:"bankName"`
+}
 type FundingSourcesResponse struct {
+	Links struct {
+		Self link `json:"self"`
+	} `json:"_links"`
+
+	Embedded struct {
+		FundingSources []Funding `json:"funding-sources"`
+	} `json:"_embedded"`
+}
+
+type link struct {
+	Href         string `json:"href"`
+	LinkType     string `json:"type"`
+	ResourceType string `json:"resourceType"`
 }

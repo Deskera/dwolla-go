@@ -3,7 +3,7 @@ package dwolla
 type client struct {
 	Auth     *auth
 	Costumer *customer
-	Root     *root
+	Account  *account
 }
 
 type Config struct {
@@ -19,21 +19,21 @@ func NewClient(config *Config) *client {
 		clientSecret: config.ClientSecret,
 		baseURL:      baseURL,
 	}
-	authHandler := Auth(authConf)
+	authHandler := AuthHandler(authConf)
 	authHandler.FetchToken()
 
 	customerConf := &customer{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
-	customerHandler := Customer(customerConf)
+	customerHandler := CustomerHandler(customerConf)
 
-	rootConf := &root{
+	rootConf := &account{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
 
-	rootHandler := Root(rootConf)
+	rootHandler := AccountHandler(rootConf)
 	err := rootHandler.setupRoot()
 	if err != nil {
 		return nil
@@ -41,7 +41,7 @@ func NewClient(config *Config) *client {
 	return &client{
 		Auth:     authHandler,
 		Costumer: customerHandler,
-		Root:     rootHandler,
+		Account:  rootHandler,
 	}
 }
 

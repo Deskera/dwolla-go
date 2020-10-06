@@ -15,7 +15,7 @@ type auth struct {
 	baseURL      string
 }
 
-func Auth(authConfig *auth) *auth {
+func AuthHandler(authConfig *auth) *auth {
 	return authConfig
 }
 

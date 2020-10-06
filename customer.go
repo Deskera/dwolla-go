@@ -1,6 +1,7 @@
 package dwolla
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"strings"
@@ -11,7 +12,7 @@ type customer struct {
 	baseURL     string
 }
 
-func Customer(customerConfig *customer) *customer {
+func CustomerHandler(customerConfig *customer) *customer {
 	return customerConfig
 }
 
@@ -57,6 +58,31 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer ReceiveOnlyCust
 	receiveOnlyCostumer.CustomerId = customerId
 
 	return &receiveOnlyCostumer, nil
+}
+
+func (c *customer) GetCustomers() (*CustomersResponse, error) {
+	url := c.baseURL + "/customers"
+	accept := "application/vnd.dwolla.v1.hal+json"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	resp, err := makeGetRequest(url, accept, nil, token)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	var customersResponse CustomersResponse
+	if err := json.NewDecoder(resp.Body).Decode(&customersResponse); err != nil {
+		return nil, err
+	}
+
+	return &customersResponse, nil
+
 }
 
 func getCustomerId(location string) (string, error) {
