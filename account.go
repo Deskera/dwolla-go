@@ -20,7 +20,6 @@ var accountId string
 
 func (a *account) setupRoot() error {
 	url := a.baseURL + "/"
-	accept := "application/vnd.dwolla.v1.hal+json"
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
@@ -28,7 +27,7 @@ func (a *account) setupRoot() error {
 		return nil
 	}
 
-	res, err := makeGetRequest(url, accept, nil, token)
+	res, err := makeGetRequest(url, nil, token)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -66,14 +65,13 @@ func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
 	}
 
 	url := a.baseURL + "/accounts" + "/" + id
-	accept := "application/vnd.dwolla.v1.hal+json"
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := makeGetRequest(url, accept, nil, token)
+	res, err := makeGetRequest(url, nil, token)
 	if err != nil {
 		return nil, err
 	}
@@ -97,14 +95,13 @@ func (a *account) GetFundingSources() (*FundingSourcesResponse, error) {
 	}
 
 	url := a.baseURL + "/accounts" + "/" + id + "/funding-sources"
-	accept := "application/vnd.dwolla.v1.hal+json"
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := makeGetRequest(url, accept, nil, token)
+	res, err := makeGetRequest(url, nil, token)
 	if err != nil {
 		return nil, err
 	}

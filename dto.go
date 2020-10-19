@@ -19,6 +19,22 @@ type ReceiveOnlyCustomer struct {
 	CustomerId    string `json:"-"`
 }
 
+type VerifiedCustomer struct {
+	FirstName     string `json:"firstName"`
+	LastName      string `json:"lastName"`
+	Email         string `json:"email"`
+	Type          string `json:"type"`
+	BusinessName  string `json:"businessName"`
+	CorrelationId string `json:"correlationId"`
+	SSN           string `json:"ssn"`
+	DateOfBirth   string `json:"dateOfBirth"`
+	PostalCode    string `json:"postalCode"`
+	State         string `json:"state"`
+	City          string `json:"city"`
+	Address1      string `json:"address1"`
+	CustomerId    string `json:"-"`
+}
+
 type UnverifiedCustomer struct {
 	FirstName     string `json:"firstName"`
 	LastName      string `json:"lastName"`
@@ -75,6 +91,12 @@ type Funding struct {
 	Channels        []string `json:"channels"`
 	BankName        string   `json:"bankName"`
 }
+
+type PlaidFundingSourceRequest struct {
+	PlaidToken string `json:"plaidToken"`
+	Name       string `json:"name"`
+}
+
 type FundingSourcesResponse struct {
 	Links struct {
 		Self link `json:"self"`

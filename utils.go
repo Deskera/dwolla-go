@@ -7,7 +7,8 @@ import (
 	"net/http"
 )
 
-func makePostRequest(url, accept string, payload interface{}, token *Token) (*http.Response, error) {
+func makePostRequest(url string, payload interface{}, token *Token) (*http.Response, error) {
+	accept := "application/vnd.dwolla.v1.hal+json"
 	bytesArray := new(bytes.Buffer)
 	if err := json.NewEncoder(bytesArray).Encode(payload); err != nil {
 		log.Println(err)
@@ -32,7 +33,8 @@ func makePostRequest(url, accept string, payload interface{}, token *Token) (*ht
 	return res, nil
 }
 
-func makeGetRequest(url, accept string, payload interface{}, token *Token) (*http.Response, error) {
+func makeGetRequest(url string, payload interface{}, token *Token) (*http.Response, error) {
+	accept := "application/vnd.dwolla.v1.hal+json"
 	var client http.Client
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {

@@ -8,8 +8,8 @@ import (
 
 func TestNewClient(t *testing.T) {
 	conf := &dwolla.Config{
-		ClientId:     "<CLIENT_ID>",
-		ClientSecret: "<CLIENT_SECRET>",
+		ClientId:     "",
+		ClientSecret: "",
 		Enviorment:   "sandbox",
 	}
 	client := dwolla.NewClient(conf)

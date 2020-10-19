@@ -16,9 +16,8 @@ func CustomerHandler(customerConfig *customer) *customer {
 	return customerConfig
 }
 
-func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer UnverifiedCustomer) (*UnverifiedCustomer, error) {
+func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*VerifiedCustomer, error) {
 	url := c.baseURL + "/customers"
-	accept := "application/vnd.dwolla.v1.hal+json"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
@@ -26,7 +25,28 @@ func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer UnverifiedCustome
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, accept, unverifiedCostumer, token)
+	resp, err := makePostRequest(url, verifiedCostumer, token)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	customerId := resp.Header.Get("Location")
+	verifiedCostumer.CustomerId = customerId
+
+	return verifiedCostumer, nil
+}
+
+func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer *UnverifiedCustomer) (*UnverifiedCustomer, error) {
+	url := c.baseURL + "/customers"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	resp, err := makePostRequest(url, unverifiedCostumer, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -35,12 +55,11 @@ func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer UnverifiedCustome
 	customerId := resp.Header.Get("Location")
 	unverifiedCostumer.CustomerId = customerId
 
-	return &unverifiedCostumer, nil
+	return unverifiedCostumer, nil
 }
 
-func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer ReceiveOnlyCustomer) (*ReceiveOnlyCustomer, error) {
+func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer *ReceiveOnlyCustomer) (*ReceiveOnlyCustomer, error) {
 	url := c.baseURL + "/customers"
-	accept := "application/vnd.dwolla.v1.hal+json"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
@@ -48,7 +67,7 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer ReceiveOnlyCust
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, accept, receiveOnlyCostumer, token)
+	resp, err := makePostRequest(url, receiveOnlyCostumer, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -57,12 +76,50 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer ReceiveOnlyCust
 	customerId := resp.Header.Get("Location")
 	receiveOnlyCostumer.CustomerId = customerId
 
-	return &receiveOnlyCostumer, nil
+	return receiveOnlyCostumer, nil
 }
+
+func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fundingSourceName string) (string, error) {
+	url := c.baseURL + "/customers/" + customerId + "/funding-sources"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	fundingSourceReq := &PlaidFundingSourceRequest{
+		PlaidToken: plaidToken,
+		Name:       fundingSourceName,
+	}
+
+	resp, err := makePostRequest(url, fundingSourceReq, token)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	fundingSourceLink := resp.Header.Get("Location")
+
+	return fundingSourceLink, nil
+}
+
+// func (c *customer) GetFundingSourcesForCustomer(customerId string) {
+// 	url := c.baseURL + "/customers/" + customerId + "/funding-sources"
+// 	accept := "application/vnd.dwolla.v1.hal+json"
+
+// 	token, err := c.authHandler.GetToken()
+// 	if err != nil {
+// 		log.Println(err)
+// 		return "", err
+// 	}
+
+// 	resp, err := makeGetRequest(url, accept, nil, token)
+
+// }
 
 func (c *customer) GetCustomers() (*CustomersResponse, error) {
 	url := c.baseURL + "/customers"
-	accept := "application/vnd.dwolla.v1.hal+json"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
@@ -70,7 +127,7 @@ func (c *customer) GetCustomers() (*CustomersResponse, error) {
 		return nil, err
 	}
 
-	resp, err := makeGetRequest(url, accept, nil, token)
+	resp, err := makeGetRequest(url, nil, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err
