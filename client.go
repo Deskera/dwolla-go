@@ -1,6 +1,6 @@
 package dwolla
 
-type client struct {
+type Client struct {
 	Auth     *auth
 	Costumer *customer
 	Account  *account
@@ -12,7 +12,7 @@ type Config struct {
 	Enviorment   string
 }
 
-func NewClient(config *Config) *client {
+func NewClient(config *Config) *Client {
 	baseURL := getBaseURLFromEnviorment(config.Enviorment)
 	authConf := &auth{
 		clientId:     config.ClientId,
@@ -38,7 +38,7 @@ func NewClient(config *Config) *client {
 	if err != nil {
 		return nil
 	}
-	return &client{
+	return &Client{
 		Auth:     authHandler,
 		Costumer: customerHandler,
 		Account:  rootHandler,
