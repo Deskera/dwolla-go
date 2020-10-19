@@ -12,7 +12,7 @@ type Config struct {
 	Enviorment   string
 }
 
-func NewClient(config *Config) *Client {
+func NewClient(config *Config) (*Client, error) {
 	baseURL := getBaseURLFromEnviorment(config.Enviorment)
 	authConf := &auth{
 		clientId:     config.ClientId,
@@ -36,13 +36,13 @@ func NewClient(config *Config) *Client {
 	rootHandler := AccountHandler(rootConf)
 	err := rootHandler.setupRoot()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	return &Client{
 		Auth:     authHandler,
 		Costumer: customerHandler,
 		Account:  rootHandler,
-	}
+	}, nil
 }
 
 func getBaseURLFromEnviorment(enviorment string) string {

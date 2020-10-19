@@ -12,7 +12,10 @@ func TestNewClient(t *testing.T) {
 		ClientSecret: "",
 		Enviorment:   "sandbox",
 	}
-	client := dwolla.NewClient(conf)
+	client, err := dwolla.NewClient(conf)
+	if err != nil {
+		t.Log(err)
+	}
 	id, err := client.Account.GetAccountId()
 	if err != nil {
 		t.Log(err)
