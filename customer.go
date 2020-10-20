@@ -104,19 +104,45 @@ func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fund
 	return fundingSourceLink, nil
 }
 
-// func (c *customer) GetFundingSourcesForCustomer(customerId string) {
-// 	url := c.baseURL + "/customers/" + customerId + "/funding-sources"
-// 	accept := "application/vnd.dwolla.v1.hal+json"
+func (c *customer) GetFundingSourcesForCustomer(customerId string) (string, error) {
+	url := c.baseURL + "/customers/" + customerId + "/funding-sources"
 
-// 	token, err := c.authHandler.GetToken()
-// 	if err != nil {
-// 		log.Println(err)
-// 		return "", err
-// 	}
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
 
-// 	resp, err := makeGetRequest(url, accept, nil, token)
+	resp, err := makeGetRequest(url, nil, token)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
 
-// }
+	fundingSourceLink := resp.Header.Get("Location")
+
+	return fundingSourceLink, nil
+}
+
+func (c *customer) AddFundingSourceForCustomer(customerId string, fundingSourceReq *FundingSourceRequest) (string, error) {
+	url := c.baseURL + "/customers/" + customerId + "/funding-sources"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	resp, err := makePostRequest(url, fundingSourceReq, token)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	fundingSourceLink := resp.Header.Get("Location")
+
+	return fundingSourceLink, nil
+}
 
 func (c *customer) GetCustomers() (*CustomersResponse, error) {
 	url := c.baseURL + "/customers"

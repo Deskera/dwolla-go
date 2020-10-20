@@ -92,6 +92,14 @@ type Funding struct {
 	BankName        string   `json:"bankName"`
 }
 
+type FundingSourceRequest struct {
+	RoutingNumber   string `json:"routingNumber"`
+	AccountNumber   string `json:"accountNumber"`
+	BankAccountType string `json:"bankAccountType"`
+	Name            string `json:"name"`
+	PlaidToken      string `json:"plaidToken"`
+}
+
 type PlaidFundingSourceRequest struct {
 	PlaidToken string `json:"plaidToken"`
 	Name       string `json:"name"`

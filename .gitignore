@@ -15,3 +15,5 @@
 # vendor/
 
 cmd/
+
+client_test.go
