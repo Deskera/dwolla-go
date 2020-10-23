@@ -2,7 +2,6 @@ package dwolla
 
 import (
 	"encoding/json"
-	"log"
 )
 
 type payment struct {
@@ -19,7 +18,6 @@ func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *Mas
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -29,7 +27,6 @@ func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *Mas
 
 	resp, err := makePostRequest(url, header, massPaymentReq, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -44,13 +41,11 @@ func (p *payment) GetMassPaymentById(massPaymentLink string) (*MassPaymentRespon
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	resp, err := makeGetRequest(url, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -69,7 +64,6 @@ func (p *payment) UpdateMassPaymentStatus(massPaymentLink string, status Payment
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -79,7 +73,6 @@ func (p *payment) UpdateMassPaymentStatus(massPaymentLink string, status Payment
 
 	resp, err := makePostRequest(url, nil, statusReq, token)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
