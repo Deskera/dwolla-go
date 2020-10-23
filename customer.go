@@ -31,8 +31,8 @@ func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*
 		return nil, err
 	}
 
-	customerId := resp.Header.Get("Location")
-	verifiedCostumer.CustomerId = customerId
+	customerLocation := resp.Header.Get(location)
+	verifiedCostumer.CustomerLocation = customerLocation
 
 	return verifiedCostumer, nil
 }
@@ -52,7 +52,7 @@ func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer *UnverifiedCustom
 		return nil, err
 	}
 
-	customerId := resp.Header.Get("Location")
+	customerId := resp.Header.Get(location)
 	unverifiedCostumer.CustomerId = customerId
 
 	return unverifiedCostumer, nil
@@ -73,7 +73,7 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer *ReceiveOnlyCus
 		return nil, err
 	}
 
-	customerId := resp.Header.Get("Location")
+	customerId := resp.Header.Get(location)
 	receiveOnlyCostumer.CustomerId = customerId
 
 	return receiveOnlyCostumer, nil
@@ -99,7 +99,7 @@ func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fund
 		return "", err
 	}
 
-	fundingSourceLink := resp.Header.Get("Location")
+	fundingSourceLink := resp.Header.Get(location)
 
 	return fundingSourceLink, nil
 }
@@ -119,7 +119,7 @@ func (c *customer) GetFundingSourcesForCustomer(customerId string) (string, erro
 		return "", err
 	}
 
-	fundingSourceLink := resp.Header.Get("Location")
+	fundingSourceLink := resp.Header.Get(location)
 
 	return fundingSourceLink, nil
 }
@@ -139,9 +139,9 @@ func (c *customer) AddFundingSourceForCustomer(customerId string, fundingSourceR
 		return "", err
 	}
 
-	fundingSourceLink := resp.Header.Get("Location")
+	fundingSourceLocation := resp.Header.Get(location)
 
-	return fundingSourceLink, nil
+	return fundingSourceLocation, nil
 }
 
 func (c *customer) GetCustomers() (*CustomersResponse, error) {
@@ -165,8 +165,9 @@ func (c *customer) GetCustomers() (*CustomersResponse, error) {
 	}
 
 	return &customersResponse, nil
-
 }
+
+func (c *customer) GetCustomerById(customerLocation string)
 
 func getCustomerId(location string) (string, error) {
 	if location == "" {
