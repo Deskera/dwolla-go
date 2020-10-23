@@ -25,7 +25,7 @@ func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, verifiedCostumer, token)
+	resp, err := makePostRequest(url, nil, verifiedCostumer, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -46,7 +46,7 @@ func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer *UnverifiedCustom
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, unverifiedCostumer, token)
+	resp, err := makePostRequest(url, nil, unverifiedCostumer, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -67,7 +67,7 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer *ReceiveOnlyCus
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, receiveOnlyCostumer, token)
+	resp, err := makePostRequest(url, nil, receiveOnlyCostumer, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -93,7 +93,7 @@ func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fund
 		Name:       fundingSourceName,
 	}
 
-	resp, err := makePostRequest(url, fundingSourceReq, token)
+	resp, err := makePostRequest(url, nil, fundingSourceReq, token)
 	if err != nil {
 		log.Println(err)
 		return "", err
@@ -113,7 +113,7 @@ func (c *customer) GetFundingSourcesForCustomer(customerId string) (string, erro
 		return "", err
 	}
 
-	resp, err := makeGetRequest(url, nil, token)
+	resp, err := makeGetRequest(url, token)
 	if err != nil {
 		log.Println(err)
 		return "", err
@@ -133,7 +133,7 @@ func (c *customer) AddFundingSourceForCustomer(customerId string, fundingSourceR
 		return "", err
 	}
 
-	resp, err := makePostRequest(url, fundingSourceReq, token)
+	resp, err := makePostRequest(url, nil, fundingSourceReq, token)
 	if err != nil {
 		log.Println(err)
 		return "", err
@@ -153,7 +153,7 @@ func (c *customer) GetCustomers() (*CustomersResponse, error) {
 		return nil, err
 	}
 
-	resp, err := makeGetRequest(url, nil, token)
+	resp, err := makeGetRequest(url, token)
 	if err != nil {
 		log.Println(err)
 		return nil, err

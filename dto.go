@@ -62,19 +62,21 @@ type CustomersResponse struct {
 }
 
 type RootResponse struct {
-	Links struct {
-		Account link `json:"account"`
-	} `json:"_links"`
+	Links AccountLink `json:"_links"`
+}
+
+type AccountLink struct {
+	Account Link `json:"account"`
 }
 
 type AccountDetailsResponse struct {
 	Links struct {
-		Self           link `json:"self"`
-		Receive        link `json:"receive"`
-		FundingSources link `json:"funding-sources"`
-		Transfers      link `json:"transfers"`
-		Customers      link `json:"customers"`
-		Send           link `json:"send"`
+		Self           Link `json:"self"`
+		Receive        Link `json:"receive"`
+		FundingSources Link `json:"funding-sources"`
+		Transfers      Link `json:"transfers"`
+		Customers      Link `json:"customers"`
+		Send           Link `json:"send"`
 	} `json:"_links"`
 	Id   string `json:"id"`
 	Name string `json:"name"`
@@ -106,17 +108,53 @@ type PlaidFundingSourceRequest struct {
 }
 
 type FundingSourcesResponse struct {
-	Links struct {
-		Self link `json:"self"`
-	} `json:"_links"`
-
+	Links    SelfLink `json:"_links"`
 	Embedded struct {
 		FundingSources []Funding `json:"funding-sources"`
 	} `json:"_embedded"`
 }
 
-type link struct {
+type SelfLink struct {
+	Self Link `json:"self"`
+}
+
+type Link struct {
 	Href         string `json:"href"`
 	LinkType     string `json:"type"`
 	ResourceType string `json:"resourceType"`
+}
+
+type MassPayment struct {
+	Links         SourceLink    `json:"_links"`
+	Items         []PaymentItem `json:"items"`
+	Status        PaymentStatus `json:"status"`
+	CorrelationId string        `json:"correlationId"`
+	Location      string        `json:"-"`
+}
+
+type SourceLink struct {
+	Source Link `json:"source"`
+}
+
+type DestinationLink struct {
+	Destination Link `json:"destination"`
+}
+type PaymentItem struct {
+	Links         DestinationLink `json:"_links"`
+	Amount        Amount          `json:"amount"`
+	Metadata      interface{}     `json:"metadata"`
+	CorrelationId string          `json:"correlationId"`
+}
+
+type Amount struct {
+	Value    string `json:"value"`
+	Currency string `json:"currency"`
+}
+
+type Header struct {
+	IdempotencyKey string
+}
+
+type UpdateMassPayment struct {
+	Status PaymentStatus `json:"status"`
 }

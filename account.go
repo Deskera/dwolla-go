@@ -27,7 +27,7 @@ func (a *account) setupRoot() error {
 		return nil
 	}
 
-	res, err := makeGetRequest(url, nil, token)
+	res, err := makeGetRequest(url, token)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -71,7 +71,7 @@ func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
 		return nil, err
 	}
 
-	res, err := makeGetRequest(url, nil, token)
+	res, err := makeGetRequest(url, token)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (a *account) GetFundingSources() (*FundingSourcesResponse, error) {
 		return nil, err
 	}
 
-	res, err := makeGetRequest(url, nil, token)
+	res, err := makeGetRequest(url, token)
 	if err != nil {
 		return nil, err
 	}

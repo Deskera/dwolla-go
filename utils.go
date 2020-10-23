@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func makePostRequest(url string, payload interface{}, token *Token) (*http.Response, error) {
+func makePostRequest(url string, header *Header, payload interface{}, token *Token) (*http.Response, error) {
 	accept := "application/vnd.dwolla.v1.hal+json"
 	bytesArray := new(bytes.Buffer)
 	if err := json.NewEncoder(bytesArray).Encode(payload); err != nil {
@@ -25,6 +25,10 @@ func makePostRequest(url string, payload interface{}, token *Token) (*http.Respo
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 
+	if header != nil {
+		req.Header.Add("Idempotency-Key", header.IdempotencyKey)
+	}
+
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -33,7 +37,7 @@ func makePostRequest(url string, payload interface{}, token *Token) (*http.Respo
 	return res, nil
 }
 
-func makeGetRequest(url string, payload interface{}, token *Token) (*http.Response, error) {
+func makeGetRequest(url string, token *Token) (*http.Response, error) {
 	accept := "application/vnd.dwolla.v1.hal+json"
 	var client http.Client
 	req, err := http.NewRequest(http.MethodGet, url, nil)
