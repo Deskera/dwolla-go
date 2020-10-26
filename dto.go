@@ -158,3 +158,22 @@ type Header struct {
 type UpdateMassPayment struct {
 	Status PaymentStatus `json:"status"`
 }
+
+type IndustryClassification struct {
+	Name     string `json:"name"`
+	DwollaId string `json:"id"`
+}
+
+type BusinessClassification struct {
+	Name     string `json:"name"`
+	DwollaId string `json:"id"`
+	Embedded struct {
+		IndustryClassifications []IndustryClassification `json:"industry-classifications"`
+	} `json:"_embedded"`
+}
+
+type BusinessClassificationsResponse struct {
+	Embedded struct {
+		BusinessClassifications []BusinessClassification `json:"business-classifications"`
+	} `json:"_embedded"`
+}
