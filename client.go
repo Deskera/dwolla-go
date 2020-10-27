@@ -4,7 +4,7 @@ type Client struct {
 	Auth                    *auth
 	Customer                *customer
 	Account                 *account
-	BusinessClassifications *businessClassifications
+	BusinessClassifications *business
 }
 
 type Config struct {
@@ -40,7 +40,7 @@ func NewClient(config *Config) (*Client, error) {
 		return nil, err
 	}
 
-	businessClassifications := &businessClassifications{
+	businessClassifications := &business{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
