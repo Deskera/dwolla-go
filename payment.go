@@ -14,7 +14,7 @@ func PaymentHandler(paymentConfig *customer) *customer {
 	return paymentConfig
 }
 
-func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *MassPayment) (*MassPayment, error) {
+func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *MassPaymentRequest) (*MassPaymentRequest, error) {
 	url := p.baseURL + "/mass-payments"
 
 	token, err := p.authHandler.GetToken()
@@ -33,13 +33,13 @@ func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *Mas
 		return nil, err
 	}
 
-	massPaymentLocation := resp.Header.Get("Location")
+	massPaymentLocation := resp.Header.Get(location)
 	massPaymentReq.Location = massPaymentLocation
 
 	return massPaymentReq, nil
 }
 
-func (p *payment) GetMassPaymentById(massPaymentLink string) (*MassPayment, error) {
+func (p *payment) GetMassPaymentById(massPaymentLink string) (*MassPaymentResponse, error) {
 	url := massPaymentLink
 
 	token, err := p.authHandler.GetToken()
@@ -56,7 +56,7 @@ func (p *payment) GetMassPaymentById(massPaymentLink string) (*MassPayment, erro
 
 	defer resp.Body.Close()
 
-	var massPaymentResp MassPayment
+	var massPaymentResp MassPaymentResponse
 	if err := json.NewDecoder(resp.Body).Decode(&massPaymentResp); err != nil {
 		return nil, err
 	}

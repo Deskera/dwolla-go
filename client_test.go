@@ -35,7 +35,7 @@ func TestNewClient(t *testing.T) {
 
 	t.Logf("funding sources: %+v\n", fundingSources)
 
-	customers, err := client.Costumer.GetCustomers()
+	customers, err := client.Customer.GetCustomers()
 	if err != nil {
 		t.Log(err)
 	}
