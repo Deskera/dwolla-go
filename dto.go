@@ -10,54 +10,65 @@ type Token struct {
 }
 
 type ReceiveOnlyCustomer struct {
-	FirstName     string `json:"firstName"`
-	LastName      string `json:"lastName"`
-	Email         string `json:"email"`
-	Type          string `json:"type"`
-	BusinessName  string `json:"businessName"`
-	CorrelationId string `json:"correlationId"`
-	CustomerId    string `json:"-"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	Email            string `json:"email"`
+	Type             string `json:"type"`
+	BusinessName     string `json:"businessName"`
+	CorrelationId    string `json:"correlationId"`
+	CustomerId       string `json:"-"`
+	CustomerLocation string `json:"-"`
 }
 
 type VerifiedCustomer struct {
-	FirstName     string `json:"firstName"`
-	LastName      string `json:"lastName"`
-	Email         string `json:"email"`
-	Type          string `json:"type"`
-	BusinessName  string `json:"businessName"`
-	CorrelationId string `json:"correlationId"`
-	SSN           string `json:"ssn"`
-	DateOfBirth   string `json:"dateOfBirth"`
-	PostalCode    string `json:"postalCode"`
-	State         string `json:"state"`
-	City          string `json:"city"`
-	Address1      string `json:"address1"`
-	CustomerId    string `json:"-"`
+	FirstName              string       `json:"firstName"`
+	LastName               string       `json:"lastName"`
+	Email                  string       `json:"email"`
+	Type                   CustomerType `json:"type"`
+	BusinessName           string       `json:"businessName"`
+	CorrelationId          string       `json:"correlationId"`
+	SSN                    string       `json:"ssn"`
+	DateOfBirth            string       `json:"dateOfBirth"`
+	PostalCode             string       `json:"postalCode"`
+	State                  string       `json:"state"`
+	City                   string       `json:"city"`
+	Address1               string       `json:"address1"`
+	Address2               string       `json:"address2"`
+	BusinessType           BusinessType `json:"businessType"`
+	DoingBusinessAs        string       `json:"doingBusinessAs"`
+	BusinessClassification string       `json:"businessClassification"`
+	EIN                    string       `json:"ein"`
+	Website                string       `json:"website"`
+	Phone                  string       `json:"phone"`
+	CustomerId             string       `json:"-"`
+	CustomerLocation       string       `json:"-"`
 }
 
 type UnverifiedCustomer struct {
-	FirstName     string `json:"firstName"`
-	LastName      string `json:"lastName"`
-	Email         string `json:"email"`
-	BusinessName  string `json:"businessName"`
-	CorrelationId string `json:"correlationId"`
-	CustomerId    string `json:"-"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	Email            string `json:"email"`
+	BusinessName     string `json:"businessName"`
+	CorrelationId    string `json:"correlationId"`
+	CustomerId       string `json:"-"`
+	CustomerLocation string `json:"-"`
 }
 
-type Customer struct {
-	Id           string `json:"id"`
-	FirstName    string `json:"firstName"`
-	LastName     string `json:"lastName"`
-	Email        string `json:"email"`
-	Type         string `json:"type"`
-	Status       string `json:"status"`
-	Created      string `json:"created"`
-	BusinessName string `json:"businessName"`
+type CustomerResponse struct {
+	Links        SelfLink `json:"_links"`
+	Id           string   `json:"id"`
+	FirstName    string   `json:"firstName"`
+	LastName     string   `json:"lastName"`
+	Email        string   `json:"email"`
+	Type         string   `json:"type"`
+	Status       string   `json:"status"`
+	Created      string   `json:"created"`
+	BusinessName string   `json:"businessName"`
 }
 
 type CustomersResponse struct {
 	Embedded struct {
-		Customers []Customer `json:"customers"`
+		Customers []CustomerResponse `json:"customers"`
 	} `json:"_embedded"`
 }
 
@@ -124,16 +135,21 @@ type Link struct {
 	ResourceType string `json:"resourceType"`
 }
 
-type MassPayment struct {
+type MassPaymentRequest struct {
 	Links         SourceLink    `json:"_links"`
 	Items         []PaymentItem `json:"items"`
 	Status        PaymentStatus `json:"status"`
 	CorrelationId string        `json:"correlationId"`
+	Metadata      interface{}   `json:"metadata"`
 	Location      string        `json:"-"`
 }
 
 type SourceLink struct {
 	Source Link `json:"source"`
+}
+
+type ItemLink struct {
+	Items Link `json:"items"`
 }
 
 type DestinationLink struct {
@@ -176,4 +192,16 @@ type BusinessClassificationsResponse struct {
 	Embedded struct {
 		BusinessClassifications []BusinessClassification `json:"business-classifications"`
 	} `json:"_embedded"`
+}
+
+type MassPaymentResponse struct {
+	Links struct {
+		SelfLink
+		SourceLink
+		ItemLink
+	} `json:"_links"`
+	Id       string        `json:"id"`
+	Status   PaymentStatus `json:"status"`
+	Created  string        `json:"created"`
+	Metadata interface{}   `json:"metadata"`
 }

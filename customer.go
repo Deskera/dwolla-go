@@ -3,7 +3,6 @@ package dwolla
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"strings"
 )
 
@@ -21,17 +20,24 @@ func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	resp, err := makePostRequest(url, nil, verifiedCostumer, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	customerId := resp.Header.Get("Location")
+	defer resp.Body.Close()
+
+	customerLocation := resp.Header.Get(location)
+	verifiedCostumer.CustomerLocation = customerLocation
+
+	customerId, err := getCustomerId(customerLocation)
+	if err != nil {
+		return nil, err
+	}
+
 	verifiedCostumer.CustomerId = customerId
 
 	return verifiedCostumer, nil
@@ -42,17 +48,22 @@ func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer *UnverifiedCustom
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	resp, err := makePostRequest(url, nil, unverifiedCostumer, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	customerId := resp.Header.Get("Location")
+	customerLocation := resp.Header.Get(location)
+	unverifiedCostumer.CustomerLocation = customerLocation
+
+	customerId, err := getCustomerId(customerLocation)
+	if err != nil {
+		return nil, err
+	}
+
 	unverifiedCostumer.CustomerId = customerId
 
 	return unverifiedCostumer, nil
@@ -63,17 +74,22 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer *ReceiveOnlyCus
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	resp, err := makePostRequest(url, nil, receiveOnlyCostumer, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	customerId := resp.Header.Get("Location")
+	customerLocation := resp.Header.Get(location)
+	receiveOnlyCostumer.CustomerLocation = customerLocation
+
+	customerId, err := getCustomerId(customerLocation)
+	if err != nil {
+		return nil, err
+	}
+
 	receiveOnlyCostumer.CustomerId = customerId
 
 	return receiveOnlyCostumer, nil
@@ -84,7 +100,6 @@ func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fund
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
@@ -95,33 +110,35 @@ func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fund
 
 	resp, err := makePostRequest(url, nil, fundingSourceReq, token)
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
-	fundingSourceLink := resp.Header.Get("Location")
+	fundingSourceLink := resp.Header.Get(location)
 
 	return fundingSourceLink, nil
 }
 
-func (c *customer) GetFundingSourcesForCustomer(customerId string) (string, error) {
+func (c *customer) GetFundingSourcesForCustomer(customerId string) (*FundingSourcesResponse, error) {
 	url := c.baseURL + "/customers/" + customerId + "/funding-sources"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
-		return "", err
+		return nil, err
 	}
 
 	resp, err := makeGetRequest(url, token)
 	if err != nil {
-		log.Println(err)
-		return "", err
+		return nil, err
 	}
 
-	fundingSourceLink := resp.Header.Get("Location")
+	defer resp.Body.Close()
 
-	return fundingSourceLink, nil
+	var fundingSourceResp FundingSourcesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&fundingSourceResp); err != nil {
+		return nil, err
+	}
+
+	return &fundingSourceResp, nil
 }
 
 func (c *customer) AddFundingSourceForCustomer(customerId string, fundingSourceReq *FundingSourceRequest) (string, error) {
@@ -129,19 +146,17 @@ func (c *customer) AddFundingSourceForCustomer(customerId string, fundingSourceR
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
 	resp, err := makePostRequest(url, nil, fundingSourceReq, token)
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
-	fundingSourceLink := resp.Header.Get("Location")
+	fundingSourceLocation := resp.Header.Get(location)
 
-	return fundingSourceLink, nil
+	return fundingSourceLocation, nil
 }
 
 func (c *customer) GetCustomers() (*CustomersResponse, error) {
@@ -149,13 +164,11 @@ func (c *customer) GetCustomers() (*CustomersResponse, error) {
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	resp, err := makeGetRequest(url, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -165,8 +178,9 @@ func (c *customer) GetCustomers() (*CustomersResponse, error) {
 	}
 
 	return &customersResponse, nil
-
 }
+
+// func (c *customer) GetCustomerById(customerLocation string)
 
 func getCustomerId(location string) (string, error) {
 	if location == "" {

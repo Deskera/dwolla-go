@@ -2,7 +2,6 @@ package dwolla
 
 import (
 	"encoding/json"
-	"log"
 )
 
 type payment struct {
@@ -14,12 +13,11 @@ func PaymentHandler(paymentConfig *customer) *customer {
 	return paymentConfig
 }
 
-func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *MassPayment) (*MassPayment, error) {
+func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *MassPaymentRequest) (*MassPaymentRequest, error) {
 	url := p.baseURL + "/mass-payments"
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -29,34 +27,31 @@ func (p *payment) InitiateMassPayment(idempotencyKey string, massPaymentReq *Mas
 
 	resp, err := makePostRequest(url, header, massPaymentReq, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	massPaymentLocation := resp.Header.Get("Location")
+	massPaymentLocation := resp.Header.Get(location)
 	massPaymentReq.Location = massPaymentLocation
 
 	return massPaymentReq, nil
 }
 
-func (p *payment) GetMassPaymentById(massPaymentLink string) (*MassPayment, error) {
+func (p *payment) GetMassPaymentById(massPaymentLink string) (*MassPaymentResponse, error) {
 	url := massPaymentLink
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	resp, err := makeGetRequest(url, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
-	var massPaymentResp MassPayment
+	var massPaymentResp MassPaymentResponse
 	if err := json.NewDecoder(resp.Body).Decode(&massPaymentResp); err != nil {
 		return nil, err
 	}
@@ -69,7 +64,6 @@ func (p *payment) UpdateMassPaymentStatus(massPaymentLink string, status Payment
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -79,7 +73,6 @@ func (p *payment) UpdateMassPaymentStatus(massPaymentLink string, status Payment
 
 	resp, err := makePostRequest(url, nil, statusReq, token)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 

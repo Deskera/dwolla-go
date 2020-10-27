@@ -28,7 +28,6 @@ func (a *auth) FetchToken() (*Token, error) {
 
 	req, err := http.NewRequest(http.MethodPost, url, payload)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
@@ -40,14 +39,12 @@ func (a *auth) FetchToken() (*Token, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	defer res.Body.Close()
 
 	if err := json.NewDecoder(res.Body).Decode(&token); err != nil {
-		log.Println(err)
 		return nil, err
 	}
 

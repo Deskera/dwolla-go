@@ -3,7 +3,6 @@ package dwolla
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"strings"
 )
 
@@ -23,13 +22,11 @@ func (a *account) setupRoot() error {
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil
 	}
 
 	res, err := makeGetRequest(url, token)
 	if err != nil {
-		log.Println(err)
 		return nil
 	}
 
@@ -82,8 +79,6 @@ func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
 	if err := json.NewDecoder(res.Body).Decode(&accountsResponse); err != nil {
 		return nil, err
 	}
-
-	log.Printf("%+v\n", accountsResponse)
 
 	return &accountsResponse, nil
 }
