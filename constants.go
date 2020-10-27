@@ -24,6 +24,7 @@ const (
 type CustomerType string
 
 const (
-	Perosnal CustomerType = "personal"
-	Business CustomerType = "business"
+	Perosnal    CustomerType = "personal"
+	Business    CustomerType = "business"
+	ReceiveOnly CustomerType = "receive-only"
 )
