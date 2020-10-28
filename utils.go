@@ -146,3 +146,29 @@ func ExtractIDFromLocation(location string) (string, error) {
 
 	return locationSplit[1], nil
 }
+
+func makeDeleteRequest(url string, token *Token) (*http.Response, error) {
+	accept := "application/vnd.dwolla.v1.hal+json"
+	var client http.Client
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Accept", accept)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	status := res.StatusCode
+	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
+		body, _ := ioutil.ReadAll(res.Body)
+		return nil, errors.New(string(body))
+	}
+
+	return res, nil
+}
