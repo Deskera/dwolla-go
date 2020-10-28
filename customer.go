@@ -15,7 +15,7 @@ func CustomerHandler(customerConfig *customer) *customer {
 	return customerConfig
 }
 
-func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*VerifiedCustomer, error) {
+func (c *customer) CreateVerifiedCustomer(verifiedCustomer *VerifiedCustomer) (*VerifiedCustomer, error) {
 	url := c.baseURL + "/customers"
 
 	token, err := c.authHandler.GetToken()
@@ -23,7 +23,7 @@ func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, nil, verifiedCostumer, token)
+	resp, err := makePostRequest(url, nil, verifiedCustomer, token)
 	if err != nil {
 		return nil, err
 	}
@@ -31,19 +31,19 @@ func (c *customer) CreateVerifiedCostumer(verifiedCostumer *VerifiedCustomer) (*
 	defer resp.Body.Close()
 
 	customerLocation := resp.Header.Get(location)
-	verifiedCostumer.CustomerLocation = customerLocation
+	verifiedCustomer.CustomerLocation = customerLocation
 
 	customerId, err := getCustomerId(customerLocation)
 	if err != nil {
 		return nil, err
 	}
 
-	verifiedCostumer.CustomerId = customerId
+	verifiedCustomer.CustomerId = customerId
 
-	return verifiedCostumer, nil
+	return verifiedCustomer, nil
 }
 
-func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer *UnverifiedCustomer) (*UnverifiedCustomer, error) {
+func (c *customer) CreateUnverifiedCustomer(unverifiedCustomer *UnverifiedCustomer) (*UnverifiedCustomer, error) {
 	url := c.baseURL + "/customers"
 
 	token, err := c.authHandler.GetToken()
@@ -51,25 +51,25 @@ func (c *customer) CreateUnverifiedCostumer(unverifiedCostumer *UnverifiedCustom
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, nil, unverifiedCostumer, token)
+	resp, err := makePostRequest(url, nil, unverifiedCustomer, token)
 	if err != nil {
 		return nil, err
 	}
 
 	customerLocation := resp.Header.Get(location)
-	unverifiedCostumer.CustomerLocation = customerLocation
+	unverifiedCustomer.CustomerLocation = customerLocation
 
 	customerId, err := getCustomerId(customerLocation)
 	if err != nil {
 		return nil, err
 	}
 
-	unverifiedCostumer.CustomerId = customerId
+	unverifiedCustomer.CustomerId = customerId
 
-	return unverifiedCostumer, nil
+	return unverifiedCustomer, nil
 }
 
-func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer *ReceiveOnlyCustomer) (*ReceiveOnlyCustomer, error) {
+func (c *customer) CreateReceiveOnlyCustomer(receiveOnlyCustomer *ReceiveOnlyCustomer) (*ReceiveOnlyCustomer, error) {
 	url := c.baseURL + "/customers"
 
 	token, err := c.authHandler.GetToken()
@@ -77,22 +77,22 @@ func (c *customer) CreateReceiveOnlyCostumer(receiveOnlyCostumer *ReceiveOnlyCus
 		return nil, err
 	}
 
-	resp, err := makePostRequest(url, nil, receiveOnlyCostumer, token)
+	resp, err := makePostRequest(url, nil, receiveOnlyCustomer, token)
 	if err != nil {
 		return nil, err
 	}
 
 	customerLocation := resp.Header.Get(location)
-	receiveOnlyCostumer.CustomerLocation = customerLocation
+	receiveOnlyCustomer.CustomerLocation = customerLocation
 
 	customerId, err := getCustomerId(customerLocation)
 	if err != nil {
 		return nil, err
 	}
 
-	receiveOnlyCostumer.CustomerId = customerId
+	receiveOnlyCustomer.CustomerId = customerId
 
-	return receiveOnlyCostumer, nil
+	return receiveOnlyCustomer, nil
 }
 
 func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerId, fundingSourceName string) (string, error) {

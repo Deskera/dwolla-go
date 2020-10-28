@@ -10,14 +10,13 @@ type Token struct {
 }
 
 type ReceiveOnlyCustomer struct {
-	FirstName        string `json:"firstName"`
-	LastName         string `json:"lastName"`
-	Email            string `json:"email"`
-	Type             string `json:"type"`
-	BusinessName     string `json:"businessName"`
-	CorrelationId    string `json:"correlationId"`
-	CustomerId       string `json:"-"`
-	CustomerLocation string `json:"-"`
+	FirstName        string       `json:"firstName"`
+	LastName         string       `json:"lastName"`
+	Email            string       `json:"email"`
+	Type             CustomerType `json:"type"`
+	CorrelationId    string       `json:"correlationId"`
+	CustomerId       string       `json:"-"`
+	CustomerLocation string       `json:"-"`
 }
 
 type VerifiedCustomer struct {

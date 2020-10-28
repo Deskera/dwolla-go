@@ -1,10 +1,11 @@
 package dwolla
 
 type Client struct {
-	Auth                    *auth
-	Customer                *customer
-	Account                 *account
-	BusinessClassifications *business
+	Auth     *auth
+	Customer *customer
+	Account  *account
+	Business *business
+	Payment  *payment
 }
 
 type Config struct {
@@ -44,11 +45,18 @@ func NewClient(config *Config) (*Client, error) {
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
+
+	paymentHandler := &payment{
+		authHandler: authHandler,
+		baseURL:     baseURL,
+	}
+
 	return &Client{
-		Auth:                    authHandler,
-		Customer:                customerHandler,
-		Account:                 rootHandler,
-		BusinessClassifications: businessClassifications,
+		Auth:     authHandler,
+		Customer: customerHandler,
+		Account:  rootHandler,
+		Business: businessClassifications,
+		Payment:  paymentHandler,
 	}, nil
 }
 
