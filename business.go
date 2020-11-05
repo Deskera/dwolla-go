@@ -17,13 +17,13 @@ func (c *business) GetBusinessClassification() (*BusinessClassificationsResponse
 		return nil, err
 	}
 
-	resp, err := makeGetRequest(url, token)
+	resp, err := get(url, token)
 	if err != nil {
 		return nil, err
 	}
 
 	var data BusinessClassificationsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
 		return nil, err
 	}
 

@@ -8,7 +8,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	conf := &dwolla.Config{
-		ClientId:     "",
+		ClientKey:    "",
 		ClientSecret: "",
 		Enviorment:   "sandbox",
 	}
@@ -16,7 +16,7 @@ func TestNewClient(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	id, err := client.Account.GetAccountId()
+	id, err := client.Account.GetAccountID()
 	if err != nil {
 		t.Log(err)
 	}

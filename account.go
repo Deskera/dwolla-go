@@ -25,15 +25,13 @@ func (a *account) setupRoot() error {
 		return nil
 	}
 
-	res, err := makeGetRequest(url, token)
+	res, err := get(url, token)
 	if err != nil {
 		return nil
 	}
 
-	defer res.Body.Close()
-
 	var root RootResponse
-	if err := json.NewDecoder(res.Body).Decode(&root); err != nil {
+	if err := json.Unmarshal(res.Body, &root); err != nil {
 		return nil
 	}
 
@@ -41,22 +39,21 @@ func (a *account) setupRoot() error {
 	return nil
 }
 
-func (a *account) GetAccountId() (string, error) {
+func (a *account) GetAccountID() (string, error) {
 	if accountId == "" {
 		return "", errors.New("no accountId")
 	}
 
-	accountIdSplit := strings.Split(accountId, "/accounts/")
-	if len(accountIdSplit) < 1 {
+	accountIDSplit := strings.Split(accountId, "/accounts/")
+	if len(accountIDSplit) < 1 {
 		return "", errors.New("error extraction id")
 	}
 
-	accountIdFetched := accountIdSplit[1]
-	return accountIdFetched, nil
+	return accountIDSplit[1], nil
 }
 
 func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
-	id, err := a.GetAccountId()
+	id, err := a.GetAccountID()
 	if err != nil {
 		return nil, err
 	}
@@ -68,15 +65,13 @@ func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
 		return nil, err
 	}
 
-	res, err := makeGetRequest(url, token)
+	res, err := get(url, token)
 	if err != nil {
 		return nil, err
 	}
 
-	defer res.Body.Close()
-
 	var accountsResponse AccountDetailsResponse
-	if err := json.NewDecoder(res.Body).Decode(&accountsResponse); err != nil {
+	if err := json.Unmarshal(res.Body, &accountsResponse); err != nil {
 		return nil, err
 	}
 
@@ -84,7 +79,7 @@ func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
 }
 
 func (a *account) GetFundingSources() (*FundingSourcesResponse, error) {
-	id, err := a.GetAccountId()
+	id, err := a.GetAccountID()
 	if err != nil {
 		return nil, err
 	}
@@ -96,15 +91,13 @@ func (a *account) GetFundingSources() (*FundingSourcesResponse, error) {
 		return nil, err
 	}
 
-	res, err := makeGetRequest(url, token)
+	res, err := get(url, token)
 	if err != nil {
 		return nil, err
 	}
 
-	defer res.Body.Close()
-
 	var accountsResponse FundingSourcesResponse
-	if err := json.NewDecoder(res.Body).Decode(&accountsResponse); err != nil {
+	if err := json.Unmarshal(res.Body, &accountsResponse); err != nil {
 		return nil, err
 	}
 

@@ -19,6 +19,14 @@ func AuthHandler(authConfig *auth) *auth {
 	return authConfig
 }
 
+// Token is a dwolla auth token
+type Token struct {
+	AccessToken string  `json:"access_token"`
+	TokenType   string  `json:"token_type"`
+	ExpiresIn   float64 `json:"expires_in"`
+	CreatedAt   time.Time
+}
+
 var token Token
 
 func (a *auth) FetchToken() (*Token, error) {
@@ -78,4 +86,9 @@ func isValid(token *Token) bool {
 	}
 
 	return true
+}
+
+// Expired returns true if token has expired
+func (t *Token) Expired() bool {
+	return time.Since(t.CreatedAt) > time.Duration(t.ExpiresIn)*time.Second
 }
