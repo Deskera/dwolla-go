@@ -1,22 +1,26 @@
 package dwolla
 
+//Client is the dwolla client
 type Client struct {
-	Auth                    *auth
-	Customer                *customer
-	Account                 *account
-	BusinessClassifications *businessClassifications
+	Auth     *auth
+	Customer *customer
+	Account  *account
+	Business *business
+	Payment  *massPayment
 }
 
+//Config ...
 type Config struct {
-	ClientId     string
+	ClientKey    string
 	ClientSecret string
 	Enviorment   string
 }
 
+//NewClient setups a new dwolla client
 func NewClient(config *Config) (*Client, error) {
 	baseURL := getBaseURLFromEnviorment(config.Enviorment)
 	authConf := &auth{
-		clientId:     config.ClientId,
+		clientId:     config.ClientKey,
 		clientSecret: config.ClientSecret,
 		baseURL:      baseURL,
 	}
@@ -40,15 +44,22 @@ func NewClient(config *Config) (*Client, error) {
 		return nil, err
 	}
 
-	businessClassifications := &businessClassifications{
+	businessClassifications := &business{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
+
+	paymentHandler := &massPayment{
+		authHandler: authHandler,
+		baseURL:     baseURL,
+	}
+
 	return &Client{
-		Auth:                    authHandler,
-		Customer:                customerHandler,
-		Account:                 rootHandler,
-		BusinessClassifications: businessClassifications,
+		Auth:     authHandler,
+		Customer: customerHandler,
+		Account:  rootHandler,
+		Business: businessClassifications,
+		Payment:  paymentHandler,
 	}, nil
 }
 
@@ -57,6 +68,8 @@ func getBaseURLFromEnviorment(enviorment string) string {
 	switch enviorment {
 	case "sandbox":
 		baseURL = "https://api-sandbox.dwolla.com"
+	case "production":
+		baseURL = "https://api.dwolla.com"
 	}
 
 	return baseURL

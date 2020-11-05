@@ -2,31 +2,28 @@ package dwolla
 
 import (
 	"encoding/json"
-	"log"
 )
 
-type businessClassifications struct {
+type business struct {
 	authHandler *auth
 	baseURL     string
 }
 
-func (c *businessClassifications) Get() (*BusinessClassificationsResponse, error) {
+func (c *business) GetBusinessClassification() (*BusinessClassificationsResponse, error) {
 	url := c.baseURL + "/business-classifications"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
-	resp, err := makeGetRequest(url, token)
+	resp, err := get(url, token)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	var data BusinessClassificationsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
 		return nil, err
 	}
 
