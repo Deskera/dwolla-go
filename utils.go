@@ -32,10 +32,7 @@ type resp struct {
 }
 
 func post(url string, header *Header, payload interface{}, token *Token) (*resp, error) {
-	var (
-		validationError ValidationError
-		bodyReader      io.Reader
-	)
+	var bodyReader io.Reader
 
 	if payload != nil {
 		bodyBytes, err := json.Marshal(payload)
@@ -76,11 +73,7 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 
 	status := res.StatusCode
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
-		if err := json.Unmarshal(body, &validationError); err != nil {
-			return nil, err
-		}
-
-		return nil, validationError
+		return nil, errors.New(string(body))
 	}
 
 	return &resp{
@@ -90,8 +83,6 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 }
 
 func get(url string, token *Token) (*resp, error) {
-	var validationError ValidationError
-
 	var client http.Client
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -118,11 +109,7 @@ func get(url string, token *Token) (*resp, error) {
 
 	status := res.StatusCode
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
-		if err := json.Unmarshal(body, &validationError); err != nil {
-			return nil, err
-		}
-
-		return nil, validationError
+		return nil, errors.New(string(body))
 	}
 
 	return &resp{
