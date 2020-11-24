@@ -156,3 +156,20 @@ type MassPaymentResponse struct {
 	Created  string            `json:"created"`
 	Metadata interface{}       `json:"metadata"`
 }
+
+type WebhookSubscription struct {
+	Id      string `json:"id"`
+	Url     string `json:"url"`
+	Created string `json:"created"`
+}
+
+type WebhookSubscriptionsResponse struct {
+	Embedded struct {
+		Subscriptions []WebhookSubscription `json:"webhook-subscriptions"`
+	} `json:"_embedded"`
+}
+
+type WebhookSubscriptionRequest struct {
+	URL    string `json:"url"`
+	Secret string `json:"secret"`
+}
