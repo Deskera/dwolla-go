@@ -10,20 +10,45 @@ import (
 // CustomerType is the customer's type
 type CustomerType string
 
+const (
+	// CustomerTypeBusiness is when the customer is a business
+	CustomerTypeBusiness CustomerType = "business"
+	// CustomerTypePersonal is when the customer is an individual
+	CustomerTypePersonal CustomerType = "personal"
+	// CustomerTypeReceiveOnly is when the customer can only receive funds
+	CustomerTypeReceiveOnly CustomerType = "receive-only"
+	// CustomerTypeUnverified is when the customer is unverified
+	CustomerTypeUnverified CustomerType = "unverified"
+)
+
 // BusinessType is the type of business setup
 type BusinessType string
-
-const (
-	Perosnal    CustomerType = "personal"
-	Business    CustomerType = "business"
-	ReceiveOnly CustomerType = "receive-only"
-)
 
 const (
 	LLC                BusinessType = "llc"
 	Patnership         BusinessType = "partnership"
 	Corporation        BusinessType = "corporation"
 	SoleProprietorship BusinessType = "soleProprietorship"
+)
+
+// CustomerStatus is the customer's status
+type CustomerStatus string
+
+const (
+	// CustomerStatusDeactivated is when the customer has been deactivated
+	CustomerStatusDeactivated CustomerStatus = "deactivated"
+	// CustomerStatusDocument is when the customer needs verification document
+	CustomerStatusDocument CustomerStatus = "document"
+	// CustomerStatusReactivated is when a deactivated customer is reactivated
+	CustomerStatusReactivated CustomerStatus = "reactivated"
+	// CustomerStatusRetry is when the customer needs to retry verification
+	CustomerStatusRetry CustomerStatus = "retry"
+	// CustomerStatusSuspended is when the customer has been suspended
+	CustomerStatusSuspended CustomerStatus = "suspended"
+	// CustomerStatusUnverified is when the customer is unverified
+	CustomerStatusUnverified CustomerStatus = "unverified"
+	// CustomerStatusVerified is when the customer is verified
+	CustomerStatusVerified CustomerStatus = "verified"
 )
 
 type customer struct {
@@ -36,7 +61,7 @@ func CustomerHandler(customerConfig *customer) *customer {
 	return customerConfig
 }
 
-func (c *customer) CreateCustomer(customer interface{}) (*Customer, error) {
+func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, error) {
 	url := c.baseURL + "/customers"
 
 	token, err := c.authHandler.GetToken()

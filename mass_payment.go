@@ -38,6 +38,7 @@ type MassPaymentStatus string
 // MassPaymentItemStatus is a mass payment item status
 type MassPaymentItemStatus string
 
+//MassPaymentHandler is used to create/update mass payment requests
 func MassPaymentHandler(paymentConfig *customer) *customer {
 	return paymentConfig
 }
@@ -65,7 +66,7 @@ func (p *massPayment) InitiateMassPayment(idempotencyKey string, massPaymentReq 
 	return massPaymentReq, nil
 }
 
-func (p *massPayment) GetMassPaymentById(massPaymentLink string) (*MassPaymentResponse, error) {
+func (p *massPayment) GetMassPaymentByID(massPaymentLink string) (*MassPaymentResponse, error) {
 	url := massPaymentLink
 
 	token, err := p.authHandler.GetToken()
