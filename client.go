@@ -2,11 +2,12 @@ package dwolla
 
 //Client is the dwolla client
 type Client struct {
-	Auth     *auth
-	Customer *customer
-	Account  *account
-	Business *business
-	Payment  *massPayment
+	Auth                 *auth
+	Customer             *customer
+	Account              *account
+	Business             *business
+	Payment              *massPayment
+	WebhookSubscriptions *webhook
 }
 
 //Config ...
@@ -54,12 +55,18 @@ func NewClient(config *Config) (*Client, error) {
 		baseURL:     baseURL,
 	}
 
+	webhookSubscriptions := &webhook{
+		authHandler: authHandler,
+		baseURL:     baseURL,
+	}
+
 	return &Client{
-		Auth:     authHandler,
-		Customer: customerHandler,
-		Account:  rootHandler,
-		Business: businessClassifications,
-		Payment:  paymentHandler,
+		Auth:                 authHandler,
+		Customer:             customerHandler,
+		Account:              rootHandler,
+		Business:             businessClassifications,
+		Payment:              paymentHandler,
+		WebhookSubscriptions: webhookSubscriptions,
 	}, nil
 }
 

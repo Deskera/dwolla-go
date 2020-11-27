@@ -32,10 +32,7 @@ type resp struct {
 }
 
 func post(url string, header *Header, payload interface{}, token *Token) (*resp, error) {
-	var (
-		validationError ValidationError
-		bodyReader      io.Reader
-	)
+	var bodyReader io.Reader
 
 	if payload != nil {
 		bodyBytes, err := json.Marshal(payload)
@@ -76,11 +73,7 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 
 	status := res.StatusCode
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
-		if err := json.Unmarshal(body, &validationError); err != nil {
-			return nil, err
-		}
-
-		return nil, validationError
+		return nil, errors.New(string(body))
 	}
 
 	return &resp{
@@ -90,8 +83,6 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 }
 
 func get(url string, token *Token) (*resp, error) {
-	var validationError ValidationError
-
 	var client http.Client
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -118,11 +109,7 @@ func get(url string, token *Token) (*resp, error) {
 
 	status := res.StatusCode
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
-		if err := json.Unmarshal(body, &validationError); err != nil {
-			return nil, err
-		}
-
-		return nil, validationError
+		return nil, errors.New(string(body))
 	}
 
 	return &resp{
@@ -158,4 +145,30 @@ func ExtractIDFromLocation(location string) (string, error) {
 	}
 
 	return locationSplit[1], nil
+}
+
+func makeDeleteRequest(url string, token *Token) (*http.Response, error) {
+	accept := "application/vnd.dwolla.v1.hal+json"
+	var client http.Client
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Accept", accept)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	status := res.StatusCode
+	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
+		body, _ := ioutil.ReadAll(res.Body)
+		return nil, errors.New(string(body))
+	}
+
+	return res, nil
 }

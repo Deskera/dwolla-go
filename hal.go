@@ -6,12 +6,13 @@ import "fmt"
 type ValidationError struct {
 	Code     string   `json:"code"`
 	Message  string   `json:"message"`
+	Raw      string   `json:"raw_error"`
 	Embedded Embedded `json:"_embedded"`
 }
 
 // Error implements the error interface
 func (v ValidationError) Error() string {
-	return fmt.Sprintf("[%s] %s", v.Code, v.Message)
+	return fmt.Sprintf("%s", v.Raw)
 }
 
 // Embedded is a hal embedded resource

@@ -38,6 +38,35 @@ type UnverifiedCustomer struct {
 	CorrelationID string `json:"correlationId"`
 }
 
+// Controller is a controller of a business
+type Controller struct {
+	FirstName   string   `json:"firstName,omitempty"`
+	LastName    string   `json:"lastName,omitempty"`
+	Title       string   `json:"title,omitempty"`
+	DateOfBirth string   `json:"dateOfBirth,omitempty"`
+	SSN         string   `json:"ssn,omitempty"`
+	Address     Address  `json:"address,omitempty"`
+	Passport    Passport `json:"passport,omitempty"`
+}
+
+// Address represents a street address
+type Address struct {
+	Address1            string `json:"address1"`
+	Address2            string `json:"address2,omitempty"`
+	Address3            string `json:"address3,omitempty"`
+	City                string `json:"city"`
+	StateProvinceRegion string `json:"stateProvinceRegion"`
+	PostalCode          string `json:"postalCode,omitempty"`
+	Country             string `json:"country"`
+}
+
+// Passport represents a passport
+type Passport struct {
+	Number  string `json:"number"`
+	Country string `json:"country"`
+}
+
+// Customer is a dwolla customer
 type Customer struct {
 	ID            string       `json:"id"`
 	CorrelationID string       `json:"correlationId"`
@@ -50,6 +79,47 @@ type Customer struct {
 	Created       bool         `json:"created"`
 	BusinessName  string       `json:"businessName"`
 	RawResponse   string       `json:"rawResponse"`
+}
+
+// CustomerRequest is a customer create/update request
+//
+// We don't just use the Customer struct here because there are fields that
+// are not returned by the Dwolla API. As such, we don't want fields to be
+// unset during marshaling.
+type CustomerRequest struct {
+	FirstName              string             `json:"firstName,omitempty"`
+	LastName               string             `json:"lastName,omitempty"`
+	Email                  string             `json:"email,omitempty"`
+	CorrelationID          string             `json:"correlationId"`
+	IPAddress              string             `json:"ipAddress,omitempty"`
+	Type                   CustomerType       `json:"type,omitempty"`
+	Status                 CustomerStatus     `json:"status,omitempty"`
+	DateOfBirth            string             `json:"dateOfBirth,omitempty"`
+	SSN                    string             `json:"ssn,omitempty"`
+	Phone                  string             `json:"phone,omitempty"`
+	Address1               string             `json:"address1,omitempty"`
+	Address2               string             `json:"address2,omitempty"`
+	City                   string             `json:"city,omitempty"`
+	State                  string             `json:"state,omitempty"`
+	PostalCode             string             `json:"postalCode,omitempty"`
+	BusinessClassification string             `json:"businessClassification,omitempty"`
+	BusinessType           BusinessType       `json:"businessType,omitempty"`
+	BusinessName           string             `json:"businessName,omitempty"`
+	DoingBusinessAs        string             `json:"doingBusinessAs,omitempty"`
+	EIN                    string             `json:"ein,omitempty"`
+	Website                string             `json:"website,omitempty"`
+	Controller             *ControllerRequest `json:"controller,omitempty"`
+}
+
+// ControllerRequest is a controller of a business create/update request
+type ControllerRequest struct {
+	FirstName   string    `json:"firstName,omitempty"`
+	LastName    string    `json:"lastName,omitempty"`
+	Title       string    `json:"title,omitempty"`
+	DateOfBirth string    `json:"dateOfBirth,omitempty"`
+	SSN         string    `json:"ssn,omitempty"`
+	Address     Address   `json:"address,omitempty"`
+	Passport    *Passport `json:"passport,omitempty"`
 }
 
 type CustomersResponse struct {
@@ -155,4 +225,21 @@ type MassPaymentResponse struct {
 	Status   MassPaymentStatus `json:"status"`
 	Created  string            `json:"created"`
 	Metadata interface{}       `json:"metadata"`
+}
+
+type WebhookSubscription struct {
+	Id      string `json:"id"`
+	Url     string `json:"url"`
+	Created string `json:"created"`
+}
+
+type WebhookSubscriptionsResponse struct {
+	Embedded struct {
+		Subscriptions []WebhookSubscription `json:"webhook-subscriptions"`
+	} `json:"_embedded"`
+}
+
+type WebhookSubscriptionRequest struct {
+	URL    string `json:"url"`
+	Secret string `json:"secret"`
 }
