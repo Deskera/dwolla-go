@@ -11,40 +11,36 @@ type account struct {
 	baseURL     string
 }
 
-func AccountHandler(accountConfig *account) *account {
-	return accountConfig
-}
+var accountID string
 
-var accountId string
-
-func (a *account) setupRoot() error {
+func (a *account) setupRoot() (*Raw, error) {
 	url := a.baseURL + "/"
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	res, err := get(url, token)
+	res, raw, err := get(url, token)
 	if err != nil {
-		return nil
+		return raw, err
 	}
 
 	var root RootResponse
 	if err := json.Unmarshal(res.Body, &root); err != nil {
-		return nil
+		return raw, err
 	}
 
-	accountId = root.Links.Account.Href
-	return nil
+	accountID = root.Links.Account.Href
+	return raw, nil
 }
 
 func (a *account) GetAccountID() (string, error) {
-	if accountId == "" {
+	if accountID == "" {
 		return "", errors.New("no accountId")
 	}
 
-	accountIDSplit := strings.Split(accountId, "/accounts/")
+	accountIDSplit := strings.Split(accountID, "/accounts/")
 	if len(accountIDSplit) < 1 {
 		return "", errors.New("error extraction id")
 	}
@@ -52,54 +48,54 @@ func (a *account) GetAccountID() (string, error) {
 	return accountIDSplit[1], nil
 }
 
-func (a *account) GetAccountDetails() (*AccountDetailsResponse, error) {
+func (a *account) GetAccountDetails() (*AccountDetailsResponse, *Raw, error) {
 	id, err := a.GetAccountID()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	url := a.baseURL + "/accounts" + "/" + id
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	res, err := get(url, token)
+	res, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var accountsResponse AccountDetailsResponse
 	if err := json.Unmarshal(res.Body, &accountsResponse); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &accountsResponse, nil
+	return &accountsResponse, raw, nil
 }
 
-func (a *account) GetFundingSources() (*FundingSourcesResponse, error) {
+func (a *account) GetFundingSources() (*FundingSourcesResponse, *Raw, error) {
 	id, err := a.GetAccountID()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	url := a.baseURL + "/accounts" + "/" + id + "/funding-sources"
 
 	token, err := a.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	res, err := get(url, token)
+	res, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var accountsResponse FundingSourcesResponse
 	if err := json.Unmarshal(res.Body, &accountsResponse); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &accountsResponse, nil
+	return &accountsResponse, raw, nil
 }

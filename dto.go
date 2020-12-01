@@ -1,41 +1,11 @@
 package dwolla
 
-type ReceiveOnlyCustomer struct {
-	FirstName     string       `json:"firstName"`
-	LastName      string       `json:"lastName"`
-	Email         string       `json:"email"`
-	Type          CustomerType `json:"type"`
-	CorrelationID string       `json:"correlationId"`
-}
-
-type VerifiedCustomer struct {
-	FirstName              string       `json:"firstName"`
-	LastName               string       `json:"lastName"`
-	Email                  string       `json:"email"`
-	Type                   CustomerType `json:"type"`
-	BusinessName           string       `json:"businessName"`
-	CorrelationID          string       `json:"correlationId"`
-	SSN                    string       `json:"ssn"`
-	DateOfBirth            string       `json:"dateOfBirth"`
-	PostalCode             string       `json:"postalCode"`
-	State                  string       `json:"state"`
-	City                   string       `json:"city"`
-	Address1               string       `json:"address1"`
-	Address2               string       `json:"address2"`
-	BusinessType           BusinessType `json:"businessType"`
-	DoingBusinessAs        string       `json:"doingBusinessAs"`
-	BusinessClassification string       `json:"businessClassification"`
-	EIN                    string       `json:"ein"`
-	Website                string       `json:"website"`
-	Phone                  string       `json:"phone"`
-}
-
-type UnverifiedCustomer struct {
-	FirstName     string `json:"firstName"`
-	LastName      string `json:"lastName"`
-	Email         string `json:"email"`
-	BusinessName  string `json:"businessName"`
-	CorrelationID string `json:"correlationId"`
+// Raw represents the actual request and response sent/received by dwolla
+type Raw struct {
+	Endpoint string
+	Request  string
+	Response string
+	Status   int
 }
 
 // Controller is a controller of a business
@@ -78,14 +48,9 @@ type Customer struct {
 	Status        string       `json:"status"`
 	Created       bool         `json:"created"`
 	BusinessName  string       `json:"businessName"`
-	RawResponse   string       `json:"rawResponse"`
 }
 
 // CustomerRequest is a customer create/update request
-//
-// We don't just use the Customer struct here because there are fields that
-// are not returned by the Dwolla API. As such, we don't want fields to be
-// unset during marshaling.
 type CustomerRequest struct {
 	FirstName              string             `json:"firstName,omitempty"`
 	LastName               string             `json:"lastName,omitempty"`
@@ -161,6 +126,7 @@ type SourceLink struct {
 	Source Link `json:"source,omitempty"`
 }
 
+// MassPayment is a dwolla mass payment
 type MassPayment struct {
 	Links         SourceLink        `json:"_links,omitempty"`
 	ID            string            `json:"id,omitempty"`
@@ -181,6 +147,7 @@ type MassPaymentItem struct {
 	Embedded      Embedded              `json:"_embedded,omitempty,omitempty"`
 }
 
+// Amount stores the amount object required by dwolla
 type Amount struct {
 	Value    string   `json:"value"`
 	Currency Currency `json:"currency"`
@@ -196,7 +163,7 @@ type UpdateMassPayment struct {
 
 type IndustryClassification struct {
 	Name     string `json:"name"`
-	DwollaId string `json:"id"`
+	DwollaID string `json:"id"`
 }
 
 type BusinessClassification struct {
@@ -228,8 +195,8 @@ type MassPaymentResponse struct {
 }
 
 type WebhookSubscription struct {
-	Id      string `json:"id"`
-	Url     string `json:"url"`
+	ID      string `json:"id"`
+	URL     string `json:"url"`
 	Created string `json:"created"`
 }
 

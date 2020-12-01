@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -31,13 +30,15 @@ type resp struct {
 	Header *http.Header
 }
 
-func post(url string, header *Header, payload interface{}, token *Token) (*resp, error) {
+func post(url string, header *Header, payload interface{}, token *Token) (*resp, *Raw, error) {
 	var bodyReader io.Reader
+	var bodyBytes []byte
 
 	if payload != nil {
-		bodyBytes, err := json.Marshal(payload)
+		var err error
+		bodyBytes, err = json.Marshal(payload)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		bodyReader = bytes.NewReader(bodyBytes)
@@ -46,7 +47,7 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 	var client http.Client
 	req, err := http.NewRequest(http.MethodPost, url, bodyReader)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	req.Header.Set("Accept", "application/vnd.dwolla.v1.hal+json")
@@ -59,34 +60,40 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	log.Println(string(body))
-
 	status := res.StatusCode
+
+	raw := &Raw{
+		Endpoint: url,
+		Request:  string(bodyBytes),
+		Response: string(body),
+		Status:   status,
+	}
+
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
-		return nil, errors.New(string(body))
+		return nil, raw, errors.New(string(body))
 	}
 
 	return &resp{
 		Body:   body,
 		Header: &res.Header,
-	}, nil
+	}, raw, nil
 }
 
-func get(url string, token *Token) (*resp, error) {
+func get(url string, token *Token) (*resp, *Raw, error) {
 	var client http.Client
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	req.Header.Set("Accept", "application/vnd.dwolla.v1.hal+json")
@@ -95,27 +102,33 @@ func get(url string, token *Token) (*resp, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	log.Println(string(body))
-
 	status := res.StatusCode
+
+	raw := &Raw{
+		Endpoint: url,
+		Request:  "",
+		Response: string(body),
+		Status:   status,
+	}
+
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
-		return nil, errors.New(string(body))
+		return nil, raw, errors.New(string(body))
 	}
 
 	return &resp{
 		Body:   body,
 		Header: &res.Header,
-	}, nil
+	}, raw, nil
 }
 
 func parseError(err string) ([]HALError, error) {
@@ -135,16 +148,12 @@ func parseError(err string) ([]HALError, error) {
 // If the input HREF is malformed, or this function is unable to extract the ID,
 // ErrNoID will be returned.
 func ExtractIDFromLocation(location string) (string, error) {
-	if location == "" {
-		return "", errors.New("no location")
+	lastIDX := strings.LastIndex(location, "/")
+	if lastIDX < 0 {
+		return "", ErrNoID
 	}
 
-	locationSplit := strings.Split(location, "/customers/")
-	if len(locationSplit) < 1 {
-		return "", errors.New("error extraction id")
-	}
-
-	return locationSplit[1], nil
+	return location[lastIDX+1:], nil
 }
 
 func makeDeleteRequest(url string, token *Token) (*http.Response, error) {

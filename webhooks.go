@@ -7,45 +7,45 @@ type webhook struct {
 	baseURL     string
 }
 
-func (c *webhook) List() (*WebhookSubscriptionsResponse, error) {
+func (c *webhook) List() (*WebhookSubscriptionsResponse, *Raw, error) {
 	url := c.baseURL + "/webhook-subscriptions"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := get(url, token)
+	resp, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var data WebhookSubscriptionsResponse
 	if err := json.Unmarshal(resp.Body, &data); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &data, nil
+	return &data, raw, nil
 }
 
-func (c *webhook) Create(endpoint string, secret string) error {
+func (c *webhook) Create(endpoint string, secret string) (*Raw, error) {
 	url := c.baseURL + "/webhook-subscriptions"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	subscription := WebhookSubscriptionRequest{
 		URL:    endpoint,
 		Secret: secret,
 	}
 
-	_, err = post(url, nil, subscription, token)
+	_, raw, err := post(url, nil, subscription, token)
 	if err != nil {
-		return err
+		return raw, err
 	}
 
-	return nil
+	return raw, nil
 }
 
 func (c *webhook) Delete(id string) error {

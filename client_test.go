@@ -22,20 +22,20 @@ func TestNewClient(t *testing.T) {
 	}
 	t.Log("id: ", id)
 
-	accountDetails, err := client.Account.GetAccountDetails()
+	accountDetails, _, err := client.Account.GetAccountDetails()
 	if err != nil {
 		t.Log(err)
 	}
 	t.Logf("account: %+v\n", accountDetails)
 
-	fundingSources, err := client.Account.GetFundingSources()
+	fundingSources, _, err := client.Account.GetFundingSources()
 	if err != nil {
 		t.Log(err)
 	}
 
 	t.Logf("funding sources: %+v\n", fundingSources)
 
-	customers, err := client.Customer.GetCustomers()
+	customers, _, err := client.Customer.GetCustomers()
 	if err != nil {
 		t.Log(err)
 	}

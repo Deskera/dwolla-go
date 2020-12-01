@@ -56,49 +56,43 @@ type customer struct {
 	baseURL     string
 }
 
-//CustomerHandler generates the customer handler on client initialisation.
-func CustomerHandler(customerConfig *customer) *customer {
-	return customerConfig
-}
-
-func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, error) {
+func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, *Raw, error) {
 	url := c.baseURL + "/customers"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var customerResp Customer
 	if err := copier.Copy(&customerResp, &customer); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := post(url, nil, customer, token)
+	resp, raw, err := post(url, nil, customer, token)
 	if err != nil {
-		return nil, err
+		return &customerResp, nil, err
 	}
 
 	customerLocation := resp.Header.Get(location)
 	customerID, err := ExtractIDFromLocation(customerLocation)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	customerResp.Location = customerLocation
 	customerResp.ID = customerID
-	customerResp.RawResponse = string(resp.Body)
 	customerResp.Created = true
 
-	return &customerResp, nil
+	return &customerResp, raw, nil
 }
 
-func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerID, fundingSourceName string) (string, error) {
+func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerID, fundingSourceName string) (string, *Raw, error) {
 	url := c.baseURL + "/customers/" + customerID + "/funding-sources"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	fundingSourceReq := &PlaidFundingSourceRequest{
@@ -106,74 +100,74 @@ func (c *customer) AddFundingSourceForCustomerPlaid(plaidToken, customerID, fund
 		Name:       fundingSourceName,
 	}
 
-	resp, err := post(url, nil, fundingSourceReq, token)
+	resp, raw, err := post(url, nil, fundingSourceReq, token)
 	if err != nil {
-		return "", err
+		return "", raw, err
 	}
 
 	fundingSourceLink := resp.Header.Get(location)
 
-	return fundingSourceLink, nil
+	return fundingSourceLink, raw, nil
 }
 
-func (c *customer) GetFundingSourcesForCustomer(customerID string) (*FundingSourcesResponse, error) {
+func (c *customer) GetFundingSourcesForCustomer(customerID string) (*FundingSourcesResponse, *Raw, error) {
 	url := c.baseURL + "/customers/" + customerID + "/funding-sources"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := get(url, token)
+	resp, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var fundingSourceResp FundingSourcesResponse
 	if err := json.Unmarshal(resp.Body, &fundingSourceResp); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &fundingSourceResp, nil
+	return &fundingSourceResp, raw, nil
 }
 
-func (c *customer) AddFundingSourceForCustomer(customerID string, fundingSourceReq *FundingSourceRequest) (string, error) {
+func (c *customer) AddFundingSourceForCustomer(customerID string, fundingSourceReq *FundingSourceRequest) (string, *Raw, error) {
 	url := c.baseURL + "/customers/" + customerID + "/funding-sources"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	resp, err := post(url, nil, fundingSourceReq, token)
+	resp, raw, err := post(url, nil, fundingSourceReq, token)
 	if err != nil {
-		return "", err
+		return "", raw, err
 	}
 
 	fundingSourceLocation := resp.Header.Get(location)
 
-	return fundingSourceLocation, nil
+	return fundingSourceLocation, raw, nil
 }
 
-func (c *customer) GetCustomers() (*CustomersResponse, error) {
+func (c *customer) GetCustomers() (*CustomersResponse, *Raw, error) {
 	url := c.baseURL + "/customers"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := get(url, token)
+	resp, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var customersResponse CustomersResponse
 	if err := json.Unmarshal(resp.Body, &customersResponse); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &customersResponse, nil
+	return &customersResponse, raw, nil
 }
 
 func (c *customer) CutomerErrorHandler(errMsg error) (string, error) {
