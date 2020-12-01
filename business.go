@@ -9,23 +9,23 @@ type business struct {
 	baseURL     string
 }
 
-func (c *business) GetBusinessClassification() (*BusinessClassificationsResponse, error) {
+func (c *business) GetBusinessClassification() (*BusinessClassificationsResponse, *Raw, error) {
 	url := c.baseURL + "/business-classifications"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := get(url, token)
+	resp, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var data BusinessClassificationsResponse
 	if err := json.Unmarshal(resp.Body, &data); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &data, nil
+	return &data, raw, nil
 }

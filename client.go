@@ -20,32 +20,30 @@ type Config struct {
 //NewClient setups a new dwolla client
 func NewClient(config *Config) (*Client, error) {
 	baseURL := getBaseURLFromEnviorment(config.Enviorment)
-	authConf := &auth{
-		clientId:     config.ClientKey,
+	authHandler := &auth{
+		clientID:     config.ClientKey,
 		clientSecret: config.ClientSecret,
 		baseURL:      baseURL,
 	}
-	authHandler := AuthHandler(authConf)
+
 	authHandler.FetchToken()
 
-	customerConf := &customer{
-		authHandler: authHandler,
-		baseURL:     baseURL,
-	}
-	customerHandler := CustomerHandler(customerConf)
-
-	rootConf := &account{
+	customerHandler := &customer{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
 
-	rootHandler := AccountHandler(rootConf)
-	err := rootHandler.setupRoot()
+	rootHandler := &account{
+		authHandler: authHandler,
+		baseURL:     baseURL,
+	}
+
+	_, err := rootHandler.setupRoot()
 	if err != nil {
 		return nil, err
 	}
 
-	businessClassifications := &business{
+	businessClassificationsHandler := &business{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
@@ -55,7 +53,7 @@ func NewClient(config *Config) (*Client, error) {
 		baseURL:     baseURL,
 	}
 
-	webhookSubscriptions := &webhook{
+	webhookHandler := &webhook{
 		authHandler: authHandler,
 		baseURL:     baseURL,
 	}
@@ -64,9 +62,9 @@ func NewClient(config *Config) (*Client, error) {
 		Auth:                 authHandler,
 		Customer:             customerHandler,
 		Account:              rootHandler,
-		Business:             businessClassifications,
+		Business:             businessClassificationsHandler,
 		Payment:              paymentHandler,
-		WebhookSubscriptions: webhookSubscriptions,
+		WebhookSubscriptions: webhookHandler,
 	}, nil
 }
 

@@ -10,13 +10,9 @@ import (
 )
 
 type auth struct {
-	clientId     string
+	clientID     string
 	clientSecret string
 	baseURL      string
-}
-
-func AuthHandler(authConfig *auth) *auth {
-	return authConfig
 }
 
 // Token is a dwolla auth token
@@ -39,7 +35,7 @@ func (a *auth) FetchToken() (*Token, error) {
 		return nil, err
 	}
 
-	data := a.clientId + ":" + a.clientSecret
+	data := a.clientID + ":" + a.clientSecret
 
 	sEnc := base64.StdEncoding.EncodeToString([]byte(data))
 	req.Header.Add("Authorization", "Basic "+sEnc)
@@ -62,7 +58,6 @@ func (a *auth) FetchToken() (*Token, error) {
 
 func (a *auth) GetToken() (*Token, error) {
 	if &token != nil && isValid(&token) {
-		log.Println("Token is Valid")
 		return &token, nil
 	}
 

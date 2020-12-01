@@ -5,6 +5,9 @@ import (
 	"log"
 )
 
+// MassPaymentStatus is a mass payment status
+type MassPaymentStatus string
+
 const (
 	// MassPaymentStatusDeferred is when a mass payment is deferred
 	MassPaymentStatusDeferred MassPaymentStatus = "deferred"
@@ -17,6 +20,9 @@ const (
 	// MassPaymentStatusCancelled is when the mass payment is cancelled
 	MassPaymentStatusCancelled MassPaymentStatus = "cancelled"
 )
+
+// MassPaymentItemStatus is a mass payment item status
+type MassPaymentItemStatus string
 
 const (
 	// MassPaymentItemStatusPending is when a mass payment item is pending
@@ -32,79 +38,79 @@ type massPayment struct {
 	baseURL     string
 }
 
-// MassPaymentStatus is a mass payment status
-type MassPaymentStatus string
-
-// MassPaymentItemStatus is a mass payment item status
-type MassPaymentItemStatus string
-
 //MassPaymentHandler is used to create/update mass payment requests
 func MassPaymentHandler(paymentConfig *customer) *customer {
 	return paymentConfig
 }
 
-func (p *massPayment) InitiateMassPayment(idempotencyKey string, massPaymentReq *MassPayment) (*MassPayment, error) {
+func (p *massPayment) InitiateMassPayment(idempotencyKey string, massPaymentReq *MassPayment) (*MassPayment, *Raw, error) {
 	url := p.baseURL + "/mass-payments"
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	header := &Header{
 		IdempotencyKey: idempotencyKey,
 	}
 
-	resp, err := post(url, header, massPaymentReq, token)
+	resp, raw, err := post(url, header, massPaymentReq, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	massPaymentLocation := resp.Header.Get(location)
-	massPaymentReq.Location = massPaymentLocation
+	massPaymentID, err := ExtractIDFromLocation(massPaymentLocation)
+	if err != nil {
+		return nil, raw, err
+	}
 
-	return massPaymentReq, nil
+	massPaymentReq.Location = massPaymentLocation
+	massPaymentReq.ID = massPaymentID
+
+	return massPaymentReq, raw, nil
 }
 
-func (p *massPayment) GetMassPaymentByID(massPaymentLink string) (*MassPaymentResponse, error) {
+func (p *massPayment) GetMassPaymentByID(massPaymentLink string) (*MassPaymentResponse, *Raw, error) {
 	url := massPaymentLink
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	resp, err := get(url, token)
+	resp, raw, err := get(url, token)
 	if err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
 	var massPaymentResp MassPaymentResponse
 	if err := json.Unmarshal(resp.Body, &massPaymentResp); err != nil {
-		return nil, err
+		return nil, raw, err
 	}
 
-	return &massPaymentResp, nil
+	return &massPaymentResp, raw, nil
 }
 
-func (p *massPayment) UpdateMassPaymentStatus(massPaymentLink string, status MassPaymentStatus) error {
+func (p *massPayment) UpdateMassPaymentStatus(massPaymentLink string, status MassPaymentStatus) (*Raw, error) {
 	url := massPaymentLink
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	statusReq := &UpdateMassPayment{
 		Status: status,
 	}
 
-	resp, err := post(url, nil, statusReq, token)
+	resp, raw, err := post(url, nil, statusReq, token)
 	if err != nil {
-		return err
+		return raw, err
 	}
 
 	log.Println(string(resp.Body))
-	return nil
+	return raw, nil
 
 }
