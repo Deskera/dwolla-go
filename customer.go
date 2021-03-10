@@ -71,7 +71,7 @@ func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, *Raw, e
 
 	resp, raw, err := post(url, nil, customer, token)
 	if err != nil {
-		return &customerResp, nil, err
+		return &customerResp, raw, err
 	}
 
 	customerLocation := resp.Header.Get(location)
