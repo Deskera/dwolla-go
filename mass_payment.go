@@ -72,8 +72,8 @@ func (p *massPayment) InitiateMassPayment(idempotencyKey string, massPaymentReq 
 	return massPaymentReq, raw, nil
 }
 
-func (p *massPayment) GetMassPaymentByID(massPaymentLink string) (*MassPaymentResponse, *Raw, error) {
-	url := massPaymentLink
+func (p *massPayment) GetMassPaymentByID(massPaymentID string) (*MassPaymentResponse, *Raw, error) {
+	url := p.baseURL + "/mass-payments/" + massPaymentID
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
@@ -93,8 +93,8 @@ func (p *massPayment) GetMassPaymentByID(massPaymentLink string) (*MassPaymentRe
 	return &massPaymentResp, raw, nil
 }
 
-func (p *massPayment) UpdateMassPaymentStatus(massPaymentLink string, status MassPaymentStatus) (*Raw, error) {
-	url := massPaymentLink
+func (p *massPayment) UpdateMassPaymentStatus(massPaymentID string, status MassPaymentStatus) (*Raw, error) {
+	url := p.baseURL + "/mass-payments/" + massPaymentID
 
 	token, err := p.authHandler.GetToken()
 	if err != nil {
