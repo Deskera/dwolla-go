@@ -1,6 +1,9 @@
 package dwolla
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 type webhook struct {
 	authHandler *auth
@@ -28,24 +31,36 @@ func (c *webhook) List() (*WebhookSubscriptionsResponse, *Raw, error) {
 	return &data, raw, nil
 }
 
-func (c *webhook) Create(endpoint string, secret string) (*Raw, error) {
+func (c *webhook) Create(endpoint string, secret string) (*WebhookSubscription, *Raw, error) {
 	url := c.baseURL + "/webhook-subscriptions"
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
+	var webhookSubscription WebhookSubscription
 	subscription := WebhookSubscriptionRequest{
 		URL:    endpoint,
 		Secret: secret,
 	}
 
-	_, raw, err := post(url, nil, subscription, token)
+	resp, raw, err := post(url, nil, subscription, token)
 	if err != nil {
-		return raw, err
+		return nil, raw, err
 	}
 
-	return raw, nil
+	webhookLocation := resp.Header.Get(location)
+	webhookID, err := ExtractIDFromLocation(webhookLocation)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	webhookSubscription.ID = webhookID
+	webhookSubscription.URL = endpoint
+	webhookSubscription.Created = time.Now().String()
+
+	return &webhookSubscription, raw, nil
 }
 
 func (c *webhook) Delete(id string) error {

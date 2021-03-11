@@ -77,7 +77,7 @@ func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, *Raw, e
 	customerLocation := resp.Header.Get(location)
 	customerID, err := ExtractIDFromLocation(customerLocation)
 	if err != nil {
-		return nil, nil, err
+		return nil, raw, err
 	}
 
 	customerResp.Location = customerLocation
