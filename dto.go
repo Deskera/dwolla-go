@@ -144,7 +144,13 @@ type MassPaymentItem struct {
 	Status        MassPaymentItemStatus `json:"status,omitempty"`
 	Metadata      interface{}           `json:"metadata,omitempty"`
 	CorrelationID string                `json:"correlationId,omitempty"`
-	Embedded      Embedded              `json:"_embedded,omitempty,omitempty"`
+	Embedded      Embedded              `json:"_embedded,omitempty"`
+}
+
+// MassPaymentItems is a collection of mass payment items
+type MassPaymentItems struct {
+	Embedded map[string][]MassPaymentItem `json:"_embedded"`
+	Total    int                          `json:"total"`
 }
 
 // Amount stores the amount object required by dwolla
