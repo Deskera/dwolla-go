@@ -93,6 +93,27 @@ func (p *massPayment) GetMassPaymentByID(massPaymentID string) (*MassPaymentResp
 	return &massPaymentResp, raw, nil
 }
 
+func (p *massPayment) GetMassPaymentItemsByID(massPaymentID string) (*MassPaymentItems, *Raw, error) {
+	url := p.baseURL + "/mass-payments/" + massPaymentID + "/items"
+
+	token, err := p.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var massPaymentItems MassPaymentItems
+	if err := json.Unmarshal(resp.Body, &massPaymentItems); err != nil {
+		return nil, raw, err
+	}
+
+	return &massPaymentItems, raw, nil
+}
+
 func (p *massPayment) UpdateMassPaymentStatus(massPaymentID string, status MassPaymentStatus) (*Raw, error) {
 	url := p.baseURL + "/mass-payments/" + massPaymentID
 
