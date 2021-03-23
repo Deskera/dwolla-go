@@ -2,6 +2,7 @@ package dwolla
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 )
 
@@ -77,4 +78,27 @@ func (c *webhook) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (c *webhook) Update(id string, pause bool) (*Raw, error) {
+	url := c.baseURL + "/webhook-subscriptions/" + id
+
+	log.Print("Updating Webhook Subscription")
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, err
+	}
+
+	subscription := UpdateRequest{
+		Paused: pause,
+	}
+
+	resp, raw, err := post(url, nil, subscription, token)
+	if err != nil {
+		return raw, err
+	}
+
+	log.Println(string(resp.Body))
+	return raw, nil
 }
