@@ -80,7 +80,7 @@ func (c *webhook) Delete(id string) error {
 	return nil
 }
 
-func (c *webhook) updateWebhookSubscription(id string, pause bool) (*Raw, error) {
+func (c *webhook) Update(id string, pause bool) (*Raw, error) {
 	url := c.baseURL + "/webhook-subscriptions/" + id
 
 	log.Print("Updating Webhook Subscription")
@@ -90,8 +90,8 @@ func (c *webhook) updateWebhookSubscription(id string, pause bool) (*Raw, error)
 		return nil, err
 	}
 
-	subscription := UpdateWebhookSubscriptionRequest{
-		Pause: pause,
+	subscription := UpdateRequest{
+		Paused: pause,
 	}
 
 	resp, raw, err := post(url, nil, subscription, token)

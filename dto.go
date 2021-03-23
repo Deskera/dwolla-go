@@ -217,6 +217,6 @@ type WebhookSubscriptionRequest struct {
 	Secret string `json:"secret"`
 }
 
-type UpdateWebhookSubscriptionRequest struct {
-	Pause    bool `json:"pause"`
+type UpdateRequest struct {
+	Paused    bool `json:"paused"`
 }
