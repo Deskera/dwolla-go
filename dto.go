@@ -2,10 +2,11 @@ package dwolla
 
 // Raw represents the actual request and response sent/received by dwolla
 type Raw struct {
-	Endpoint string
-	Request  string
-	Response string
-	Status   int
+	Endpoint   string
+	Request    string
+	Response   string
+	Status     int
+	XRequestId string
 }
 
 // Controller is a controller of a business

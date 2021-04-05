@@ -22,7 +22,8 @@ const (
 	USD Currency = "USD"
 )
 const (
-	location = "Location"
+	location   = "Location"
+	xRequestId = "X-Request-Id"
 )
 
 type resp struct {
@@ -77,6 +78,7 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 		Request:  string(bodyBytes),
 		Response: string(body),
 		Status:   status,
+		XRequestId: res.Header.Get(xRequestId),
 	}
 
 	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
