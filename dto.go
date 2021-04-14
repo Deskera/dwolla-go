@@ -219,5 +219,43 @@ type WebhookSubscriptionRequest struct {
 }
 
 type UpdateRequest struct {
-	Paused    bool `json:"paused"`
+	Paused bool `json:"paused"`
+}
+
+type BeneficialOwnerRequest struct {
+	ID          string    `json:"id,omitempty"`
+	FirstName   string    `json:"firstName,omitempty"`
+	LastName    string    `json:"lastName,omitempty"`
+	DateOfBirth string    `json:"dateOfBirth,omitempty"`
+	SSN         string    `json:"ssn,omitempty"`
+	Address     Address   `json:"address,omitempty"`
+	Passport    *Passport `json:"passport,omitempty"`
+	Location    string    `json:"location,omitempty"`
+}
+
+type BeneficialOwnersResponse struct {
+	Links    SelfLink `json:"_links"`
+	Embedded struct {
+		BeneficialOwners []BeneficialOwner `json:"beneficial-owners"`
+	} `json:"_embedded"`
+	Total int `json:"total"`
+}
+
+type BeneficialOwner struct {
+	Links              SelfLink `json:"_links"`
+	ID                 string   `json:"id"`
+	FirstName          string   `json:"firstName"`
+	LastName           string   `json:"lastName"`
+	Address            Address  `json:"address"`
+	Passport           Passport `json:"passport"`
+	VerificationStatus string   `json:"verificationStatus"`
+	Created            string   `json:"created"`
+}
+type BeneficialOwnershipStatusResponse struct {
+	Links  SelfLink `json:"_links"`
+	Status string   `json:"status"`
+}
+
+type CertifyBeneficialOwnershipReq struct {
+	Status string `json:"status"`
 }
