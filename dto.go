@@ -162,6 +162,7 @@ type Amount struct {
 
 type Header struct {
 	IdempotencyKey string
+	ContentType    string
 }
 
 type UpdateMassPayment struct {

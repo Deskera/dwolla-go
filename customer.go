@@ -1,11 +1,13 @@
 package dwolla
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"log"
-
 	"github.com/jinzhu/copier"
+	"io/ioutil"
+	"log"
+	"mime/multipart"
 )
 
 // CustomerType is the customer's type
@@ -337,4 +339,46 @@ func (c *customer) CertifyBeneficialOwnership(verifiedCustomerID string, certify
 	}
 
 	return &data, raw, nil
+}
+
+//The file must be either a .jpg, .jpeg, or .png.
+//Files must be no larger than 10MB in size.
+func (c *customer) UploadVerificationDocument(beneficialOwnerID string, f multipart.File, h *multipart.FileHeader) (*Raw, error) {
+	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID + "/documents"
+
+	buf := new(bytes.Buffer)
+	writer := multipart.NewWriter(buf)
+
+	part, err := writer.CreateFormFile("file", h.Filename)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	part.Write(b)
+	writer.Close()
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, err
+	}
+
+	header := &Header{
+		ContentType: writer.FormDataContentType(),
+	}
+
+	resp, raw, err := post(url, header, buf, token)
+	if err != nil {
+		return raw, err
+	}
+
+	log.Println(string(resp.Body))
+	return raw, nil
 }
