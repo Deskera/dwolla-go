@@ -343,26 +343,36 @@ func (c *customer) CertifyBeneficialOwnership(verifiedCustomerID string, certify
 
 //The file must be either a .jpg, .jpeg, or .png.
 //Files must be no larger than 10MB in size.
-func (c *customer) UploadVerificationDocument(beneficialOwnerID string, f multipart.File, h *multipart.FileHeader) (*Raw, error) {
+func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType string, fileReq FileRequest) (*Raw, error) {
+	if fileReq.FileHeader == nil || fileReq.File == nil {
+		log.Println("Invalid file object.")
+		return nil, errors.New("invalid file object")
+	}
+
 	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID + "/documents"
 
 	buf := new(bytes.Buffer)
 	writer := multipart.NewWriter(buf)
 
-	part, err := writer.CreateFormFile("file", h.Filename)
-
+	part, err := writer.CreateFormFile("file", fileReq.FileHeader.Filename)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	b, err := ioutil.ReadAll(f)
+	b, err := ioutil.ReadAll(fileReq.File)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
 	part.Write(b)
+
+	err = writer.WriteField("documentType", documentType)
+	if err != nil {
+		log.Println(err)
+	}
+
 	writer.Close()
 
 	token, err := c.authHandler.GetToken()

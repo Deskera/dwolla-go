@@ -1,5 +1,7 @@
 package dwolla
 
+import "mime/multipart"
+
 // Raw represents the actual request and response sent/received by dwolla
 type Raw struct {
 	Endpoint   string
@@ -259,4 +261,9 @@ type BeneficialOwnershipStatusResponse struct {
 
 type CertifyBeneficialOwnershipReq struct {
 	Status string `json:"status"`
+}
+
+type FileRequest struct {
+	File       multipart.File        `json:"file"`
+	FileHeader *multipart.FileHeader `json:"fileHeader"`
 }
