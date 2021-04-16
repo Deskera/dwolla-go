@@ -371,12 +371,14 @@ func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType st
 	err = writer.WriteField("documentType", documentType)
 	if err != nil {
 		log.Println(err)
+		return nil, err
 	}
 
 	writer.Close()
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -386,6 +388,7 @@ func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType st
 
 	resp, raw, err := post(url, header, buf, token)
 	if err != nil {
+		log.Println(err)
 		return raw, err
 	}
 
