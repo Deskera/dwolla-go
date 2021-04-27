@@ -52,10 +52,15 @@ func post(url string, header *Header, payload interface{}, token *Token) (*resp,
 	}
 
 	req.Header.Set("Accept", "application/vnd.dwolla.v1.hal+json")
-	req.Header.Set("Content-Type", "application/vnd.dwolla.v1.hal+json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
 
-	if header != nil {
+	if header != nil && header.ContentType != "" {
+		req.Header.Add("Content-Type", header.ContentType)
+	} else {
+		req.Header.Set("Content-Type", "application/vnd.dwolla.v1.hal+json")
+	}
+
+	if header != nil && header.IdempotencyKey != "" {
 		req.Header.Add("Idempotency-Key", header.IdempotencyKey)
 	}
 

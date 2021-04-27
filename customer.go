@@ -1,10 +1,13 @@
 package dwolla
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-
 	"github.com/jinzhu/copier"
+	"io/ioutil"
+	"log"
+	"mime/multipart"
 )
 
 // CustomerType is the customer's type
@@ -192,4 +195,203 @@ func (c *customer) CutomerErrorHandler(errMsg error) (string, error) {
 	}
 
 	return "", errMsg
+}
+
+func (c *customer) AddBeneficialOwner(verifiedCustomerID string, beneficialOwner *BeneficialOwnerRequest) (*BeneficialOwnerRequest, *Raw, error) {
+	url := c.baseURL + "/customers/" + verifiedCustomerID + "/beneficial-owners"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := post(url, nil, beneficialOwner, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	massPaymentLocation := resp.Header.Get(location)
+	massPaymentID, err := ExtractIDFromLocation(massPaymentLocation)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	beneficialOwner.Location = massPaymentLocation
+	beneficialOwner.ID = massPaymentID
+
+	return beneficialOwner, raw, nil
+}
+
+//A beneficial owner’s information can only be updated if their verification status is incomplete
+func (c *customer) UpdateBeneficialOwner(beneficialOwnerID string, beneficialOwner *BeneficialOwnerRequest) (*Raw, error) {
+	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, raw, err := post(url, nil, beneficialOwner, token)
+	if err != nil {
+		return raw, err
+	}
+
+	log.Println(string(resp.Body))
+	return raw, nil
+}
+
+func (c *customer) GetBeneficialOwnerById(beneficialOwnerID string) (*BeneficialOwner, *Raw, error) {
+	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var data BeneficialOwner
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
+		return nil, raw, err
+	}
+
+	return &data, raw, nil
+}
+
+func (c *customer) GetAllBeneficialOwners(verifiedCustomerID string) (*BeneficialOwnersResponse, *Raw, error) {
+	url := c.baseURL + "/customers/" + verifiedCustomerID + "/beneficial-owners"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var data BeneficialOwnersResponse
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
+		return nil, raw, err
+	}
+
+	return &data, raw, nil
+}
+
+//A removed beneficial owner cannot be retrieved after being removed.
+func (c *customer) DeleteBeneficialOwnerById(beneficialOwnerID string) error {
+	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return err
+	}
+
+	_, err = makeDeleteRequest(url, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *customer) RetrieveBeneficialOwnershipStatus(verifiedCustomerID string) (*BeneficialOwnershipStatusResponse, *Raw, error) {
+	url := c.baseURL + "/customers/" + verifiedCustomerID + "/beneficial-ownership"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var data BeneficialOwnershipStatusResponse
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
+		return nil, raw, err
+	}
+
+	return &data, raw, nil
+}
+
+func (c *customer) CertifyBeneficialOwnership(verifiedCustomerID string, certifyBeneficialOwnership CertifyBeneficialOwnershipReq) (*BeneficialOwnershipStatusResponse, *Raw, error) {
+	url := c.baseURL + "/customers/" + verifiedCustomerID + "/beneficial-ownership"
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := post(url, nil, certifyBeneficialOwnership, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var data BeneficialOwnershipStatusResponse
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
+		return nil, raw, err
+	}
+
+	return &data, raw, nil
+}
+
+//The file must be either a .jpg, .jpeg, or .png.
+//Files must be no larger than 10MB in size.
+func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType string, fileReq FileRequest) (*Raw, error) {
+	if fileReq.FileHeader == nil || fileReq.File == nil {
+		log.Println("Invalid file object.")
+		return nil, errors.New("invalid file object")
+	}
+
+	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID + "/documents"
+
+	buf := new(bytes.Buffer)
+	writer := multipart.NewWriter(buf)
+
+	part, err := writer.CreateFormFile("file", fileReq.FileHeader.Filename)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	b, err := ioutil.ReadAll(fileReq.File)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	part.Write(b)
+
+	err = writer.WriteField("documentType", documentType)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	writer.Close()
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	header := &Header{
+		ContentType: writer.FormDataContentType(),
+	}
+
+	resp, raw, err := post(url, header, buf, token)
+	if err != nil {
+		log.Println(err)
+		return raw, err
+	}
+
+	log.Println(string(resp.Body))
+	return raw, nil
 }
