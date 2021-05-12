@@ -8,6 +8,8 @@ type Client struct {
 	Business             *business
 	Payment              *massPayment
 	WebhookSubscriptions *webhook
+	Transfer             *transfer
+	FundingSource        *fundingSource
 }
 
 //Config ...
@@ -58,6 +60,16 @@ func NewClient(config *Config) (*Client, error) {
 		baseURL:     baseURL,
 	}
 
+	transferHandler := &transfer{
+		authHandler: authHandler,
+		baseURL:     baseURL,
+	}
+
+	fundingSourceHandler := &fundingSource{
+		authHandler: authHandler,
+		baseURL:     baseURL,
+	}
+
 	return &Client{
 		Auth:                 authHandler,
 		Customer:             customerHandler,
@@ -65,6 +77,8 @@ func NewClient(config *Config) (*Client, error) {
 		Business:             businessClassificationsHandler,
 		Payment:              paymentHandler,
 		WebhookSubscriptions: webhookHandler,
+		Transfer:             transferHandler,
+		FundingSource:        fundingSourceHandler,
 	}, nil
 }
 

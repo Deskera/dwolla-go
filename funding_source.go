@@ -1,5 +1,12 @@
 package dwolla
 
+import "encoding/json"
+
+type fundingSource struct {
+	authHandler *auth
+	baseURL     string
+}
+
 // FundingSourceStatus is a funding source's status
 type FundingSourceStatus string
 
@@ -76,4 +83,25 @@ type FundingSourcesResponse struct {
 	Embedded struct {
 		FundingSources []Funding `json:"funding-sources"`
 	} `json:"_embedded"`
+}
+
+func (f *fundingSource) GetFundingSourcesBalance(fundingSourceID string) (*FundingSourceBalance, *Raw, error) {
+	url := f.baseURL + "/funding-sources/" + fundingSourceID + "/balance"
+
+	token, err := f.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var fundingSourceResp FundingSourceBalance
+	if err := json.Unmarshal(resp.Body, &fundingSourceResp); err != nil {
+		return nil, raw, err
+	}
+
+	return &fundingSourceResp, raw, nil
 }

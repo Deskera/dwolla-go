@@ -41,6 +41,7 @@ type Passport struct {
 
 // Customer is a dwolla customer
 type Customer struct {
+	Links         Links        `json:"_links"`
 	ID            string       `json:"id"`
 	CorrelationID string       `json:"correlationId"`
 	Location      string       `json:"location"`
@@ -266,4 +267,14 @@ type CertifyBeneficialOwnershipReq struct {
 type FileRequest struct {
 	File       multipart.File        `json:"file"`
 	FileHeader *multipart.FileHeader `json:"fileHeader"`
+}
+
+type TransferResponse struct {
+	Links         Links       `json:"_links"`
+	ID            string      `json:"id"`
+	Status        string      `json:"status"`
+	Amount        Amount      `json:"amount,omitempty"`
+	Created       string      `json:"created"`
+	Metadata      interface{} `json:"metadata"`
+	CorrelationID string      `json:"correlationId"`
 }
