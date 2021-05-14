@@ -188,3 +188,47 @@ func makeDeleteRequest(url string, token *Token) (*http.Response, error) {
 
 	return res, nil
 }
+
+func upload(url string, header *Header, payload []byte, token *Token) (*resp, *Raw, error) {
+
+	var client http.Client
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(payload))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req.Header.Set("Accept", "application/vnd.dwolla.v1.hal+json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+	req.Header.Add("Content-Type", header.ContentType)
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	status := res.StatusCode
+
+	raw := &Raw{
+		Endpoint: url,
+		Request:  "",
+		Response: res.Header.Get(location),
+		Status:   status,
+		XRequestId: res.Header.Get(xRequestId),
+	}
+
+	if status == 400 || status == 403 || status == 404 || status == 500 || status == 401 {
+		return nil, raw, errors.New(string(body))
+	}
+
+	return &resp{
+		Body:   body,
+		Header: &res.Header,
+	}, raw, nil
+}

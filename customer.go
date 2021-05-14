@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/jinzhu/copier"
-	"io/ioutil"
+	"io"
 	"log"
 	"mime/multipart"
+	"strings"
 )
 
 // CustomerType is the customer's type
@@ -86,6 +87,27 @@ func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, *Raw, e
 	customerResp.Location = customerLocation
 	customerResp.ID = customerID
 	customerResp.Created = true
+
+	return &customerResp, raw, nil
+}
+
+func (c *customer) UpdateCustomer(verifiedCustomerID string, customer *CustomerRequest) (*Customer, *Raw, error) {
+	url := c.baseURL + "/customers/" + verifiedCustomerID
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var customerResp Customer
+	if err := copier.Copy(&customerResp, &customer); err != nil {
+		return nil, nil, err
+	}
+
+	_, raw, err := post(url, nil, customer, token)
+	if err != nil {
+		return &customerResp, raw, err
+	}
 
 	return &customerResp, raw, nil
 }
@@ -341,57 +363,61 @@ func (c *customer) CertifyBeneficialOwnership(verifiedCustomerID string, certify
 	return &data, raw, nil
 }
 
-//The file must be either a .jpg, .jpeg, or .png.
+//File types supported:
+//Personal IDs - .jpg, .jpeg or .png.
+//Business Documents - .jpg, .jpeg, .png, or .pdf.
 //Files must be no larger than 10MB in size.
-func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType string, fileReq FileRequest) (*Raw, error) {
+func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType, identity string, fileReq FileRequest) (string, *Raw, error) {
 	if fileReq.FileHeader == nil || fileReq.File == nil {
 		log.Println("Invalid file object.")
-		return nil, errors.New("invalid file object")
+		return "", nil, errors.New("invalid file object")
 	}
 
-	url := c.baseURL + "/beneficial-owners/" + beneficialOwnerID + "/documents"
+	var url string
+	if identity == "customer" {
+		url = c.baseURL + "/customers/" + beneficialOwnerID + "/documents"
+	} else {
+		url = c.baseURL + "/beneficial-owners/" + beneficialOwnerID + "/documents"
+	}
 
-	buf := new(bytes.Buffer)
-	writer := multipart.NewWriter(buf)
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
 
-	part, err := writer.CreateFormFile("file", fileReq.FileHeader.Filename)
+	fw, err := writer.CreateFormField("documentType")
 	if err != nil {
-		log.Println(err)
-		return nil, err
 	}
-
-	b, err := ioutil.ReadAll(fileReq.File)
+	_, err = io.Copy(fw, strings.NewReader(documentType))
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		return "", nil, err
 	}
-
-	part.Write(b)
-
-	err = writer.WriteField("documentType", documentType)
+	fw, err = writer.CreateFormFile("file", fileReq.FileHeader.Filename)
 	if err != nil {
-		log.Println(err)
-		return nil, err
 	}
-
+	_, err = io.Copy(fw, fileReq.File)
+	if err != nil {
+		return "", nil, err
+	}
+	// Close multipart writer.
 	writer.Close()
 
 	token, err := c.authHandler.GetToken()
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return "", nil, err
 	}
 
 	header := &Header{
 		ContentType: writer.FormDataContentType(),
 	}
 
-	resp, raw, err := post(url, header, buf, token)
+	resp, raw, err := upload(url, header, body.Bytes(), token)
 	if err != nil {
 		log.Println(err)
-		return raw, err
+		return "", raw, err
 	}
 
+	documentLocation := resp.Header.Get(location)
+
 	log.Println(string(resp.Body))
-	return raw, nil
+	return documentLocation, raw, nil
 }
