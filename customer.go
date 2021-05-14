@@ -421,3 +421,24 @@ func (c *customer) UploadVerificationDocument(beneficialOwnerID, documentType, i
 	log.Println(string(resp.Body))
 	return documentLocation, raw, nil
 }
+
+func (c *customer) GetDocumentById(documentId string) (*Document, *Raw, error) {
+	url := c.baseURL + "/documents/" + documentId
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var data Document
+	if err := json.Unmarshal(resp.Body, &data); err != nil {
+		return nil, raw, err
+	}
+
+	return &data, raw, nil
+}
