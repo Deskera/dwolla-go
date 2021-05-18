@@ -86,7 +86,6 @@ func (c *customer) CreateCustomer(customer *CustomerRequest) (*Customer, *Raw, e
 
 	customerResp.Location = customerLocation
 	customerResp.ID = customerID
-	customerResp.Created = true
 
 	return &customerResp, raw, nil
 }
@@ -188,6 +187,27 @@ func (c *customer) GetCustomers() (*CustomersResponse, *Raw, error) {
 	}
 
 	var customersResponse CustomersResponse
+	if err := json.Unmarshal(resp.Body, &customersResponse); err != nil {
+		return nil, raw, err
+	}
+
+	return &customersResponse, raw, nil
+}
+
+func (c *customer) GetCustomer(verifiedCustomerID string) (*Customer, *Raw, error) {
+	url := c.baseURL + "/customers/" + verifiedCustomerID
+
+	token, err := c.authHandler.GetToken()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	resp, raw, err := get(url, token)
+	if err != nil {
+		return nil, raw, err
+	}
+
+	var customersResponse Customer
 	if err := json.Unmarshal(resp.Body, &customersResponse); err != nil {
 		return nil, raw, err
 	}

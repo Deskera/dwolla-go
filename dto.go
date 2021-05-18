@@ -50,7 +50,7 @@ type Customer struct {
 	Email         string       `json:"email"`
 	Type          CustomerType `json:"type"`
 	Status        string       `json:"status"`
-	Created       bool         `json:"created"`
+	Created       string       `json:"created"`
 	BusinessName  string       `json:"businessName"`
 }
 
