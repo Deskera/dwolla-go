@@ -279,9 +279,16 @@ type TransferResponse struct {
 	CorrelationID string      `json:"correlationId"`
 }
 
+type AllFailureReasons struct {
+	Reason      string `json:"reason"`
+	Description string `json:"description"`
+}
+
 type Document struct {
-	ID      string `json:"id"`
-	Status  string `json:"status"`
-	Type    string `json:"type"`
-	Created string `json:"created"`
+	ID                string              `json:"id"`
+	Status            string              `json:"status"`
+	Type              string              `json:"type"`
+	Created           string              `json:"created"`
+	FailureReason     string              `json:"failureReason"`
+	AllFailureReasons []AllFailureReasons `json:"allFailureReasons"`
 }
